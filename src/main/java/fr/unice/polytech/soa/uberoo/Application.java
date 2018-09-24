@@ -1,4 +1,4 @@
-package hello;
+package fr.unice.polytech.soa.uberoo;
 
 import java.util.Arrays;
 

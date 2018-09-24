@@ -1,4 +1,4 @@
-package hello;
+package fr.unice.polytech.soa.uberoo;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
