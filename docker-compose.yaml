@@ -1,0 +1,11 @@
+version: "3.6"
+
+services:
+    uberoo:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+        image: soa-uberoo
+        container_name: teamh-uberoo
+        ports:
+            - "127.0.0.1:8080:8080"
