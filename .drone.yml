@@ -1,0 +1,11 @@
+pipeline:
+    build:
+        image: maven:3.3-jdk-8
+        commands:
+            - mvn package
+    slack:
+        image: plugins/slack
+        webhook:  https://hooks.slack.com/services/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
+        channel: soa_team_h
+        when:
+            status: [ success, failure ]
