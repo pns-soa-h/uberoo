@@ -1,11 +1,19 @@
 version: "3.6"
 
 services:
-    uberoo:
+    uberoo-meals:
         build:
-            context: .
+            context: uberoo-meals
             dockerfile: docker/Dockerfile
-        image: soa-uberoo
-        container_name: teamh-uberoo
+        image: soa-uberoo-meals
+        container_name: uberoo-meals
         ports:
             - "127.0.0.1:8080:8080"
+    uberoo-orders:
+        build:
+            context: uberoo-orders
+            dockerfile: docker/Dockerfile
+        image: soa-uberoo-orders
+        container_name: uberoo-orders
+        ports:
+            - "127.0.0.1:8181:8080"

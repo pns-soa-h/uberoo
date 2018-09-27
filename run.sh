@@ -1,11 +1,11 @@
 #!/bin/bash
 
-echo "Connecting to Uberoo :"
+echo "Connecting to Uberoo meals :"
 curl localhost:8080
 
 echo ""
 
-echo "Checking Uberoo's health :"
-curl localhost:8080/actuator/health
+echo "Connecting to Uberoo orders :"
+curl localhost:8181
 
 echo ""
