@@ -1,6 +1,7 @@
 package fr.unice.polytech.soa.uberoo.model;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 /**
  * Created by Alexis Couvreur on 9/24/2018.
@@ -12,8 +13,8 @@ public class Meal {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
     private String label;
-    /*@OneToOne
-    private Tag tag;*/
+    @OneToOne(cascade = CascadeType.ALL) //TODO: create tags when launching app, and delete cascade parameter
+    private Tag tag;
     private String description;
 
     public Long getId() {
@@ -32,7 +33,6 @@ public class Meal {
         this.label = label;
     }
 
-    /*
     public Tag getTag() {
         return tag;
     }
@@ -40,7 +40,6 @@ public class Meal {
     public void setTag(Tag tag) {
         this.tag = tag;
     }
-    */
 
     public String getDescription() {
         return description;
@@ -48,5 +47,20 @@ public class Meal {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Meal meal = (Meal) o;
+        return Objects.equals(label, meal.label) &&
+                Objects.equals(tag, meal.tag) &&
+                Objects.equals(description, meal.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(label, tag, description);
     }
 }
