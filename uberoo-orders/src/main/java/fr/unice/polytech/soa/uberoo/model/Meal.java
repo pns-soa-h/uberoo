@@ -19,6 +19,14 @@ public class Meal {
     private Tag tag;*/
     private String description;
 
+    public Meal(String label, String description) {
+        this.label = label;
+        this.description = description;
+    }
+
+    public Meal() {
+    }
+
     public Long getId() {
         return id;
     }
