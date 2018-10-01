@@ -12,6 +12,7 @@ public class Meal {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
+    @Column(unique = true)
     private String label;
     @OneToOne(cascade = CascadeType.ALL) //TODO: create tags when launching app, and delete cascade parameter
     private Tag tag;
