@@ -37,7 +37,6 @@ public class ApplicationTests {
         mealRepository.save(new Meal("Ramen", "Japanese dish", new Tag("asian")));
     }
 
-    @Ignore
     @Test
     public void shouldReturnRepositoryIndex() throws Exception {
         mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk()).andExpect(
