@@ -19,6 +19,6 @@ public class MealResourceAssembler implements ResourceAssembler<Meal, Resource<M
 	@Override
 	public Resource<Meal> toResource(Meal meal) {
 		return new Resource<>(meal,
-				linkTo(methodOn(MealController.class).getMeals()).withRel("meals"));
+				linkTo(methodOn(MealController.class).getMeals(null)).withRel("meals"));
 	}
 }
