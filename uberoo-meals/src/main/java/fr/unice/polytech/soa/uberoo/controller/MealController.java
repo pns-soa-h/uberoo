@@ -6,10 +6,12 @@ import fr.unice.polytech.soa.uberoo.repository.MealRepository;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
@@ -31,12 +33,17 @@ public class MealController {
 	}
 
 	@GetMapping("/meals")
-	public Resources<Resource<Meal>> getMeals() {
-		List<Resource<Meal>> meals = repository.findAll().stream()
-				.map(resourceAssembler::toResource)
+	public Resources<Resource<Meal>> getMeals(@RequestParam(value = "tag", required = false)String tag) {
+		Stream<Meal> mealStream = repository.findAll().stream();
+
+		if (tag != null) {
+			mealStream = mealStream.filter(m -> m.getTag().getLabel().equals(tag));
+		}
+
+		List<Resource<Meal>> meals = mealStream.map(resourceAssembler::toResource)
 				.collect(Collectors.toList());
 
 		return new Resources<>(meals,
-				linkTo(methodOn(MealController.class).getMeals()).withSelfRel());
+				linkTo(methodOn(MealController.class).getMeals(null)).withSelfRel());
 	}
 }

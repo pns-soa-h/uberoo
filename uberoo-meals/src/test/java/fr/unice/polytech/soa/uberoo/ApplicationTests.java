@@ -48,6 +48,18 @@ public class ApplicationTests {
 	    mockMvc.perform(get("/meals")).andDo(print()).andExpect(status().isOk());
     }
 
+    @Test
+    public void shouldReturnMealsListWithTag() throws Exception {
+    	mockMvc.perform(get("/meals?tag=asian")).andDo(print()).andExpect(status().isOk())
+	        .andExpect(jsonPath("$._embedded.meals").exists());
+    }
+
+	@Test
+	public void shouldNotReturnMealsListWithUnknownTag() throws Exception {
+		mockMvc.perform(get("/meals?tag=french")).andDo(print()).andExpect(status().isOk())
+	        .andExpect(jsonPath("$._embedded.meals").doesNotExist());
+	}
+
     @Ignore
     @Test
     public void shouldRetrieveEntity() throws Exception {
