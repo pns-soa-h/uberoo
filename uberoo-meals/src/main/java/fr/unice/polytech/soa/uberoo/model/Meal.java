@@ -1,6 +1,7 @@
 package fr.unice.polytech.soa.uberoo.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**
@@ -12,11 +13,30 @@ public class Meal {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
+
     @Column(unique = true)
+    @NotNull
     private String label;
+
     @OneToOne(cascade = CascadeType.ALL) //TODO: create tags when launching app, and delete cascade parameter
     private Tag tag;
+
+    @NotNull
     private String description;
+
+    public Meal() {
+
+    }
+
+    public Meal(String label, String description) {
+    	this.label = label;
+    	this.description = description;
+    }
+
+    public Meal(String label, String description, Tag tag) {
+    	this(label, description);
+    	this.tag = tag;
+    }
 
     public Long getId() {
         return id;
