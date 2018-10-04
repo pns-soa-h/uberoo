@@ -31,10 +31,13 @@ public class ApplicationTests {
     @Autowired
     private MealRepository mealRepository;
 
+    private Meal meal;
+
     @Before
-    public void initBeforeTests() throws Exception {
+    public void initBeforeTests() {
         mealRepository.deleteAll();
-        mealRepository.save(new Meal("Ramen", "Japanese dish", new Tag("asian")));
+        this.meal = new Meal("Ramen", "Japanese dish", new Tag("asian"));
+        mealRepository.save(this.meal);
     }
 
     @Test
@@ -60,11 +63,15 @@ public class ApplicationTests {
 	        .andExpect(jsonPath("$._embedded.meals").doesNotExist());
 	}
 
-    @Ignore
     @Test
     public void shouldRetrieveEntity() throws Exception {
-        mockMvc.perform(get("/meals/1")).andExpect(status().isOk()).andExpect(
-                jsonPath("$.label").value("Ramen")).andExpect(
-                jsonPath("$.description").value("Japanese dish"));
+        mockMvc.perform(get("/meals/"+this.meal.getId())).andExpect(status().isOk()).andExpect(
+                jsonPath("$.label").value(this.meal.getLabel())).andExpect(
+                jsonPath("$.description").value(this.meal.getDescription()));
+    }
+
+    @Test
+	public void shoudNotFindUnknownEntity() throws Exception {
+	    mockMvc.perform(get("/meals/42")).andExpect(status().isNotFound());
     }
 }
