@@ -1,6 +1,5 @@
 package fr.unice.polytech.soa.uberoo;
 
-import fr.unice.polytech.soa.uberoo.model.Coursier;
 import fr.unice.polytech.soa.uberoo.model.Order;
 
 /**
@@ -9,7 +8,7 @@ import fr.unice.polytech.soa.uberoo.model.Order;
 public interface TimeETA {
 	
 	//Return a time in milisecond
-	long calculateOrderETA(Order O, Coursier c);
+	long calculateOrderETA(Order O, Long coursierId);
 	
 	
 }
