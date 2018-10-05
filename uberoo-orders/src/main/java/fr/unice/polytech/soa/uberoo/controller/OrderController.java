@@ -1,56 +1,132 @@
 package fr.unice.polytech.soa.uberoo.controller;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+
+import fr.unice.polytech.soa.uberoo.TimeETA;
+import fr.unice.polytech.soa.uberoo.TimeETAMock;
+import fr.unice.polytech.soa.uberoo.assembler.OrderResourceAssembler;
+import fr.unice.polytech.soa.uberoo.exception.MalformedException;
+import fr.unice.polytech.soa.uberoo.exception.OrderNotFoundException;
+import fr.unice.polytech.soa.uberoo.exception.BodyMemberNotFoundException;
 import fr.unice.polytech.soa.uberoo.model.Order;
 import fr.unice.polytech.soa.uberoo.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 public class OrderController {
 
     private final OrderRepository repository;
+	private final OrderResourceAssembler assembler;
+	private TimeETA timeETA;
 
     @Autowired
-    public OrderController(OrderRepository repository) {
+    public OrderController(OrderRepository repository, OrderResourceAssembler assembler) {
         this.repository = repository;
+        this.assembler = assembler;
+        this.timeETA = new TimeETAMock();
     }
 
-    @GetMapping(value = "/orders")
-    public List<Order> index() {
-        // TODO: pagination to prevent stress
-        return repository.findAll();
-    }
+	@GetMapping("/orders")
+	public Resources<Resource<Order>> all() {
 
-    @PostMapping(value = "/orders/new"/*, consumes = "application/json"*/)
-    public ResponseEntity<Order> create(@RequestBody Order order) {
-        Order created = repository.save(order);
-        // Check if created ?
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
-    }
+		List<Resource<Order>> orders = repository.findAll().stream()
+				.map(assembler::toResource)
+				.collect(Collectors.toList());
 
-    @GetMapping(value = "/orders/{id}")
-    public Resource<Order> show(@PathVariable("id") String id) {
-        return new Resource<>(repository.getOne(Long.parseLong(id)));
-    }
+		return new Resources<>(orders,
+				linkTo(methodOn(OrderController.class).all()).withSelfRel());
+	}
 
-    /*
-    @PutMapping("/orders/{id}")
-    public Order update(@PathVariable("id") String id, @RequestBody Map<String, String> body) {
-        return null;
-    }
-    */
+	@GetMapping("/orders/{id}")
+	public Resource<Order> one(@PathVariable Long id) {
+		return assembler.toResource(
+				repository.findById(id)
+						.orElseThrow(() -> new OrderNotFoundException(id)));
+	}
 
-    @RequestMapping(value = "/orders/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<Order> assign(@PathVariable("id") String id, @RequestBody Map<String, String> body) {
-        Order order = repository.getOne(Long.parseLong(id));
-        order.setCoursierId(Long.parseLong(body.get("coursierId")));
-        repository.save(order);
-        return new ResponseEntity<>(order, HttpStatus.OK);
+	@PostMapping("/orders")
+	public ResponseEntity<Resource<Order>> newOrder(@RequestBody Order order) {
+
+		order.setStatus(Order.Status.IN_PROGRESS);
+		order.setETA(timeETA.calculateOrderETA(order, null));
+
+		Order newOrder = repository.save(order);
+
+		return ResponseEntity
+				.created(linkTo(methodOn(OrderController.class).one(newOrder.getId())).toUri())
+				.body(assembler.toResource(newOrder));
+	}
+
+
+	@PutMapping("/orders/{id}/complete")
+	public ResponseEntity<ResourceSupport> complete(@PathVariable Long id) {
+
+		Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
+
+		if (order.getStatus() == Order.Status.IN_PROGRESS) {
+			order.setStatus(Order.Status.COMPLETED);
+			return ResponseEntity.ok(assembler.toResource(repository.save(order)));
+		}
+
+		return ResponseEntity
+				.status(HttpStatus.METHOD_NOT_ALLOWED)
+				.body(new VndErrors.VndError("Method not allowed", "You can't complete an order that is in the " + order.getStatus() + " status"));
+	}
+
+	@DeleteMapping("/orders/{id}/cancel")
+	public ResponseEntity<ResourceSupport> cancel(@PathVariable Long id) {
+
+		Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
+
+		if (order.getStatus() == Order.Status.IN_PROGRESS) {
+			order.setStatus(Order.Status.CANCELLED);
+			return ResponseEntity.ok(assembler.toResource(repository.save(order)));
+		}
+
+		return ResponseEntity
+				.status(HttpStatus.METHOD_NOT_ALLOWED)
+				.body(new VndErrors.VndError("Method not allowed", "You can't cancel an order that is in the " + order.getStatus() + " status"));
+	}
+
+
+    @PutMapping(value = "/orders/{id}/assign")
+    public ResponseEntity<ResourceSupport> assign(@PathVariable("id") Long id, @RequestBody() Map<String, String> body) {
+
+		Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
+
+		if (order.getStatus() == Order.Status.COMPLETED) {
+			order.setStatus(Order.Status.ASSIGNED);
+
+			// Retrieve coursierId from body and check if present
+			String coursierId = body.get("coursierId");
+			if(coursierId == null) {
+				// else 422
+				throw new BodyMemberNotFoundException("coursierId");
+			}
+
+			// Check if header is well formed
+			try {
+				order.setCoursierId(Long.parseLong(coursierId));
+			} catch (NumberFormatException ex) {
+				// Else 422 ...
+				throw new MalformedException("coursierId", "number");
+			}
+			return ResponseEntity.ok(assembler.toResource(repository.save(order)));
+		}
+
+		return ResponseEntity
+				.status(HttpStatus.METHOD_NOT_ALLOWED)
+				.body(new VndErrors.VndError("Method not allowed", "You can't complete an order that is in the " + order.getStatus() + " status"));
     }
 }

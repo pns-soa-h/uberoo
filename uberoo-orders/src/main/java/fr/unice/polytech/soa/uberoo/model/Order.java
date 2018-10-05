@@ -26,6 +26,12 @@ public class Order implements Serializable {
     @Column(name = "coursier")
     private Long coursierId;
 
+    @Column(name = "eta")
+    private Long eta;
+
+	@Enumerated(EnumType.STRING)
+	private Status status;
+
     public Order() {
     }
 
@@ -57,5 +63,28 @@ public class Order implements Serializable {
     public Long getCoursierId() { return coursierId; }
 
     public void setCoursierId(Long coursierId) { this.coursierId = coursierId; }
+
+    public Status getStatus() {
+    	return this.status;
+	}
+
+	public void setStatus(Status status) {
+    	this.status = status;
+	}
+
+	public Long getETA() {
+    	return eta;
+	}
+
+	public void setETA(Long eta) {
+    	this.eta = eta;
+	}
+
+    public enum Status {
+		IN_PROGRESS,
+		COMPLETED,
+		CANCELLED,
+		ASSIGNED
+	}
 
 }
