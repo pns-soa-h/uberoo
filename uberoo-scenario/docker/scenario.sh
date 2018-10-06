@@ -23,11 +23,9 @@ cat order_confirm_response.json
 printf "\n\n"
 
 echo "Display created orders :"
-curl -s http://localhost:8181/orders > orders.json
-cat orders.json
+curl -s http://localhost:8181/orders
 printf "\n\n"
 
 echo "Assigning the order :"
 coursier_id=42
-curl -s -d '{"coursierId":"'$coursier_id'"}' -H "Content-Type: application/json" -X PUT $(cat order_confirm_response.json | jq '._links.assign.href' | tr -d '"') > order_assigned_response.json
-cat order_assigned_response.json
+curl -s -d '{"coursierId":"'$coursier_id'"}' -H "Content-Type: application/json" -X PUT $(cat order_confirm_response.json | jq '._links.assign.href' | tr -d '"')
