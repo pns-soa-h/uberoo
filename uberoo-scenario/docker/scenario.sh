@@ -1,17 +1,17 @@
 #!/bin/sh
 
 echo "Listing meals :"
-curl -s http://localhost:8080/meals > meals.json
-cat meals.json
+curl -s http://localhost:8080/meals
 printf "\n\n"
 
-echo "Filtering meals by \"asian\" tag"
-cat meals.json | jq '._embedded.meals[] | select(.tag.label == "asian")'
+echo "Filtering meals by \"asian\" tag :"
+curl -s http://localhost:8080/meals?tag=asian > asian_meals.json
+cat asian_meals.json
 printf "\n\n"
 
 echo "Sending request to order the ramen :"
 user_id=1
-meal_address=$(cat meals.json | jq -r '._embedded.meals[] | select(.tag.label == "asian") | ._links.self.href' | tr -d '"')
+meal_address=$(cat asian_meals.json | jq -r '._embedded.meals[] | select(.label == "Ramen") | ._links.self.href' | tr -d '"')
 meal_id=${meal_address##*/}
 curl -s -d '{"clientId":"'$user_id'", "mealId":"'$meal_id'"}' -H "Content-Type: application/json" -X POST http://localhost:8181/orders > order_create_response.json
 cat order_create_response.json
