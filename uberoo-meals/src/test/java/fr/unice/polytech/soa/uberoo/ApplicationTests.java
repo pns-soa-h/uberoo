@@ -1,10 +1,12 @@
 package fr.unice.polytech.soa.uberoo;
 
 import fr.unice.polytech.soa.uberoo.model.Meal;
+import fr.unice.polytech.soa.uberoo.model.Restaurant;
 import fr.unice.polytech.soa.uberoo.model.Tag;
 import fr.unice.polytech.soa.uberoo.repository.MealRepository;
+import fr.unice.polytech.soa.uberoo.repository.RestaurantRepository;
+import fr.unice.polytech.soa.uberoo.repository.TagRepository;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -13,9 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
-import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -31,12 +31,24 @@ public class ApplicationTests {
     @Autowired
     private MealRepository mealRepository;
 
+    @Autowired
+    private RestaurantRepository restaurantRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
+
     private Meal meal;
 
     @Before
     public void initBeforeTests() {
-        mealRepository.deleteAll();
-        this.meal = new Meal("Ramen", "Japanese dish", new Tag("asian"));
+	    mealRepository.deleteAll();
+	    tagRepository.deleteAll();
+    	restaurantRepository.deleteAll();
+        Tag tag = new Tag("asian");
+        Restaurant restaurant = new Restaurant("restaurant");
+        tagRepository.save(tag);
+        restaurantRepository.save(restaurant);
+        this.meal = new Meal("Ramen", "Japanese dish", restaurant, tag);
         mealRepository.save(this.meal);
     }
 

@@ -18,7 +18,11 @@ public class Meal {
     @NotNull
     private String label;
 
-    @OneToOne(cascade = CascadeType.ALL) //TODO: create tags when launching app, and delete cascade parameter
+    @OneToOne
+	@NotNull
+	private Restaurant restaurant;
+
+    @OneToOne
     private Tag tag;
 
     @NotNull
@@ -28,13 +32,14 @@ public class Meal {
 
     }
 
-    public Meal(String label, String description) {
+    public Meal(String label, String description, Restaurant restaurant) {
     	this.label = label;
     	this.description = description;
+    	this.restaurant = restaurant;
     }
 
-    public Meal(String label, String description, Tag tag) {
-    	this(label, description);
+    public Meal(String label, String description, Restaurant restaurant, Tag tag) {
+    	this(label, description, restaurant);
     	this.tag = tag;
     }
 
@@ -70,18 +75,27 @@ public class Meal {
         this.description = description;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Meal meal = (Meal) o;
-        return Objects.equals(label, meal.label) &&
-                Objects.equals(tag, meal.tag) &&
-                Objects.equals(description, meal.description);
-    }
+	public Restaurant getRestaurant() {
+		return restaurant;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(label, tag, description);
-    }
+	public void setRestaurant(Restaurant restaurant) {
+		this.restaurant = restaurant;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Meal meal = (Meal) o;
+		return Objects.equals(label, meal.label) &&
+				Objects.equals(restaurant, meal.restaurant) &&
+				Objects.equals(tag, meal.tag) &&
+				Objects.equals(description, meal.description);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(label, restaurant, tag, description);
+	}
 }
