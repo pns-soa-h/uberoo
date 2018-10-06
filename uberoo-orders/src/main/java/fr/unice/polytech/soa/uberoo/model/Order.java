@@ -26,18 +26,22 @@ public class Order implements Serializable {
     @Column(name = "coursier")
     private Long coursierId;
 
+    @Column(name = "restaurant", nullable = false)
+	private Long restaurantId;
+
     @Column(name = "eta")
     private Long eta;
 
 	@Enumerated(EnumType.STRING)
 	private Status status;
 
-    public Order() {
+	public Order() {
     }
 
-    public Order(Long clientId, Long mealId) {
+    public Order(Long clientId, Long mealId, Long restaurantId) {
         this.clientId = clientId;
         this.mealId = mealId;
+        this.restaurantId = restaurantId; // Must specify the restaurant in charge
     }
 
     public Long getId() {
@@ -80,7 +84,14 @@ public class Order implements Serializable {
     	this.eta = eta;
 	}
 
-    public enum Status {
+	public Long getRestaurantId() {
+    	return restaurantId;
+	}
+
+	public void setRestaurantId(Long restaurantId) {
+		this.restaurantId = restaurantId;
+	}
+	public enum Status {
 		IN_PROGRESS,
 		COMPLETED,
 		CANCELLED,

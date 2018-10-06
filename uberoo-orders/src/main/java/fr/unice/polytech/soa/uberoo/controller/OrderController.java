@@ -38,14 +38,18 @@ public class OrderController {
     }
 
 	@GetMapping("/orders")
-	public Resources<Resource<Order>> all() {
+	public Resources<Resource<Order>> all(
+			@RequestParam(value = "status", required = false)Order.Status status,
+			@RequestParam(value = "restaurant", required = false) Long restaurantId) {
 
 		List<Resource<Order>> orders = repository.findAll().stream()
+				.filter(order -> status == null || order.getStatus() == status)
+				.filter(order -> restaurantId == null || order.getRestaurantId().equals(restaurantId))
 				.map(assembler::toResource)
 				.collect(Collectors.toList());
 
 		return new Resources<>(orders,
-				linkTo(methodOn(OrderController.class).all()).withSelfRel());
+				linkTo(methodOn(OrderController.class).all(status, restaurantId)).withSelfRel());
 	}
 
 	@GetMapping("/orders/{id}")
