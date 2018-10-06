@@ -51,7 +51,7 @@ public class OrderControllerTest {
 	public void shouldCreateOrder() throws Exception {
 
 		mockMvc.perform(post("/orders")
-				.content("{\"clientId\": \"0\", \"mealId\":\"2\"}").contentType(MediaType.APPLICATION_JSON))
+				.content("{\"clientId\": \"0\", \"mealId\":\"2\", \"restaurantId\":\"5\"}").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.clientId").value("0"))
@@ -66,14 +66,24 @@ public class OrderControllerTest {
 	@Test
 	public void shouldRetrieveAllOrders() throws Exception {
 
-		mockMvc.perform(post("/orders").content("{\"clientId\": \"0\", \"mealId\":\"2\"}").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(post("/orders").content("{\"clientId\": \"0\", \"mealId\":\"2\", \"restaurantId\":\"5\"}").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
-		mockMvc.perform(post("/orders").content("{\"clientId\": \"1\", \"mealId\":\"3\"}").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(post("/orders").content("{\"clientId\": \"1\", \"mealId\":\"3\", \"restaurantId\":\"1\"}").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
-		mockMvc.perform(post("/orders").content("{\"clientId\": \"2\", \"mealId\":\"1\"}").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(post("/orders").content("{\"clientId\": \"2\", \"mealId\":\"1\", \"restaurantId\":\"7\"}").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
 
 		mockMvc.perform(get("/orders"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.orders").value(hasSize(3)));
+
+		mockMvc.perform(get("/orders?restaurant=5"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.orders").value(hasSize(1)));
+
+		mockMvc.perform(get("/orders?status=IN_PROGRESS"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.orders").value(hasSize(3)));
@@ -85,7 +95,8 @@ public class OrderControllerTest {
 
 		String clientId = "0";
 		String mealId = "2";
-		MvcResult result = createOrderAndValidate(clientId, mealId);
+		String restaurantId = "12";
+		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
 
 		// Get order ref
 		String selfOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.self.href").toString();
@@ -95,6 +106,7 @@ public class OrderControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.clientId").value(clientId))
 				.andExpect(jsonPath("$.mealId").value(mealId))
+				.andExpect(jsonPath("$.restaurantId").value(restaurantId))
 				.andExpect(jsonPath("$.status").value("IN_PROGRESS"))
 				.andExpect(jsonPath("$.coursierId").value(IsNull.nullValue()))
 				.andExpect(jsonPath("$.eta").value(1200000));
@@ -107,7 +119,8 @@ public class OrderControllerTest {
 
 		String clientId = "0";
 		String mealId = "2";
-		MvcResult result = createOrderAndValidate(clientId, mealId);
+		String restaurantId = "12";
+		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
 
 		// Get order ref
 		String completeOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.complete.href").toString();
@@ -124,7 +137,8 @@ public class OrderControllerTest {
 
 		String clientId = "0";
 		String mealId = "2";
-		MvcResult result = createOrderAndValidate(clientId, mealId);
+		String restaurantId = "12";
+		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
 
 		// Get order ref
 		String completeOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.complete.href").toString();
@@ -146,7 +160,8 @@ public class OrderControllerTest {
 
 		String clientId = "0";
 		String mealId = "2";
-		MvcResult result = createOrderAndValidate(clientId, mealId);
+		String restaurantId = "12";
+		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
 
 		// Get order ref
 		String cancelOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.cancel.href").toString();
@@ -165,7 +180,8 @@ public class OrderControllerTest {
 
 		String clientId = "0";
 		String mealId = "2";
-		MvcResult result = createOrderAndValidate(clientId, mealId);
+		String restaurantId = "12";
+		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
 
 		// Get order ref
 		String cancelOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.cancel.href").toString();
@@ -188,7 +204,8 @@ public class OrderControllerTest {
 
 		String clientId = "0";
 		String mealId = "2";
-		MvcResult result = createOrderAndValidate(clientId, mealId);
+		String restaurantId = "12";
+		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
 
 		// Need to be completed to have assign link
 		String completeOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.complete.href").toString();
@@ -217,7 +234,8 @@ public class OrderControllerTest {
 
 		String clientId = "0";
 		String mealId = "2";
-		MvcResult result = createOrderAndValidate(clientId, mealId);
+		String restaurantId = "12";
+		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
 
 		// Need to be completed to have assign link
 		String completeOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.complete.href").toString();
@@ -245,9 +263,9 @@ public class OrderControllerTest {
 				.andExpect(status().isMethodNotAllowed());
 	}
 
-	private MvcResult createOrderAndValidate(String clientId, String mealId) throws Exception {
+	private MvcResult createOrderAndValidate(String clientId, String mealId, String restaurantId) throws Exception {
 		return mockMvc.perform(post("/orders")
-				.content("{\"clientId\": \"" + clientId + "\", \"mealId\":\"" + mealId + "\"}").contentType(MediaType.APPLICATION_JSON))
+				.content("{\"clientId\": \"" + clientId + "\", \"mealId\":\"" + mealId + "\", \"restaurantId\": \"" + restaurantId + "\"}").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isCreated())
 				.andReturn();
