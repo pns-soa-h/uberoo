@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker run --network host uberoo-scenario
+docker run --rm --network host uberoo-scenario
