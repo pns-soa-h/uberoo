@@ -5,6 +5,10 @@ curl -s http://localhost:8080/meals > meals.json
 cat meals.json
 printf "\n\n"
 
+echo "Filtering meals by \"asian\" tag"
+cat meals.json | jq '._embedded.meals[] | select(.tag.label == "asian")'
+printf "\n\n"
+
 echo "Sending request to order the ramen :"
 user_id=1
 meal_address=$(cat meals.json | jq -r '._embedded.meals[] | select(.tag.label == "asian") | ._links.self.href' | tr -d '"')
