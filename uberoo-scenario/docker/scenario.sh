@@ -11,9 +11,10 @@ printf "\n\n"
 
 echo "Sending request to order the ramen :"
 user_id=1
+restaurant_id=$(cat asian_meals.json | jq -r '._embedded.meals[] | select(.label == "Ramen") | .restaurant.id')
 meal_address=$(cat asian_meals.json | jq -r '._embedded.meals[] | select(.label == "Ramen") | ._links.self.href' | tr -d '"')
 meal_id=${meal_address##*/}
-curl -s -d '{"clientId":"'$user_id'", "mealId":"'$meal_id'"}' -H "Content-Type: application/json" -X POST http://localhost:8181/orders > order_create_response.json
+curl -s -d '{"clientId":"'$user_id'", "mealId":"'$meal_id'", "restaurantId":"'$restaurant_id'"}' -H "Content-Type: application/json" -X POST http://localhost:8181/orders > order_create_response.json
 cat order_create_response.json
 printf "\n\n"
 
