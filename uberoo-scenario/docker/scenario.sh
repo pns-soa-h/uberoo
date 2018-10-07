@@ -23,8 +23,8 @@ curl -s -X PUT $(cat order_create_response.json | jq '._links.complete.href' | t
 cat order_confirm_response.json
 printf "\n\n"
 
-echo "Display created orders :"
-curl -s http://localhost:8181/orders
+echo "Display created orders for the restaurant :"
+curl -s "http://localhost:8181/orders?status=COMPLETED&restaurant=$restaurant_id"
 printf "\n\n"
 
 echo "Assigning the order :"
