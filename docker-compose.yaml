@@ -1,19 +1,64 @@
 version: "3.6"
 
 services:
-    uberoo-meals:
-        build:
-            context: uberoo-meals
-            dockerfile: docker/Dockerfile
-        image: soa-uberoo-meals
-        container_name: uberoo-meals
-        ports:
-            - "127.0.0.1:8080:8080"
-    uberoo-orders:
-        build:
-            context: uberoo-orders
-            dockerfile: docker/Dockerfile
-        image: soa-uberoo-orders
-        container_name: uberoo-orders
-        ports:
-            - "127.0.0.1:8181:8080"
+  uberoo-meals:
+    build:
+      context: uberoo-meals
+      dockerfile: docker/Dockerfile
+    image: soa-uberoo-meals
+    container_name: uberoo-meals
+    ports:
+    - "127.0.0.1:8080:8080"
+    links:
+    - kafka
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  uberoo-orders:
+    build:
+      context: uberoo-orders
+      dockerfile: docker/Dockerfile
+    image: soa-uberoo-orders
+    container_name: uberoo-orders
+    ports:
+    - "127.0.0.1:8181:8080"
+    links:
+    - kafka
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  uberoo-deliveries:
+    build:
+      context: uberoo-deliveries
+      dockerfile: docker/Dockerfile
+    image: soa-uberoo-deliveries
+    container_name: uberoo-deliveries
+    ports:
+    - "127.0.0.1:8182:8080"
+    links:
+    - kafka
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+    - "127.0.0.1:2181:2181"
+  kafka:
+    image: wurstmeister/kafka:latest
+    links:
+    - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+#      KAFKA_CREATE_TOPICS: "order:5:1"
+#  kafka:
+#    image: spotify/kafka
+#    container_name: kafka
+#    ports:
+#    - "2181:2181"
+#    - "9092:9092"
+#    environment:
+#      ADVERTISED_HOST: kafka
+#      ADVERTISED_PORT: 9092
+#      AUTO_CREATE_TOPICS: 'true'
