@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * Created by Alexis Couvreur on 9/24/2018.
  */
-@Entity(name = "OrderMeal")
+@Entity(name = "OrderDelivery")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Order implements Serializable {
 

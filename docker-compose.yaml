@@ -41,7 +41,7 @@ services:
   zookeeper:
     image: wurstmeister/zookeeper:latest
     ports:
-    - "127.0.0.1:2181:2181"
+    - "2181:2181"
   kafka:
     image: wurstmeister/kafka:latest
     links:
@@ -51,7 +51,7 @@ services:
       KAFKA_ADVERTISED_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-#      KAFKA_CREATE_TOPICS: "order:5:1"
+  #      KAFKA_CREATE_TOPICS: "order:5:1"
 #  kafka:
 #    image: spotify/kafka
 #    container_name: kafka
@@ -59,6 +59,6 @@ services:
 #    - "2181:2181"
 #    - "9092:9092"
 #    environment:
-#      ADVERTISED_HOST: kafka
+#      ADVERTISED_HOST: 'kafka'
 #      ADVERTISED_PORT: 9092
 #      AUTO_CREATE_TOPICS: 'true'
