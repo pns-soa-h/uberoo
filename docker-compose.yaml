@@ -51,14 +51,3 @@ services:
       KAFKA_ADVERTISED_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-  #      KAFKA_CREATE_TOPICS: "order:5:1"
-#  kafka:
-#    image: spotify/kafka
-#    container_name: kafka
-#    ports:
-#    - "2181:2181"
-#    - "9092:9092"
-#    environment:
-#      ADVERTISED_HOST: 'kafka'
-#      ADVERTISED_PORT: 9092
-#      AUTO_CREATE_TOPICS: 'true'
