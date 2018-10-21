@@ -17,15 +17,12 @@ public class Order implements Serializable {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "meal", nullable = false)
     @OneToOne
     private Meal meal;
 
-    @Column(name = "coursier")
 	@OneToOne
     private Coursier coursier;
 
-    @Column(name = "restaurant", nullable = false)
     @OneToOne
 	private Restaurant restaurant;
 

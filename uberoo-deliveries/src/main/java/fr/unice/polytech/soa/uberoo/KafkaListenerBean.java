@@ -11,7 +11,7 @@ public class KafkaListenerBean {
 
 	@KafkaListener(topics = "order")
 	public void deliver(Order order, Acknowledgment acknowledgment) {
-		System.out.println("Order completed : " + order.getId());
+		System.out.println("Completed order id : " + order.getId());
 		acknowledgment.acknowledge();
 	}
 
