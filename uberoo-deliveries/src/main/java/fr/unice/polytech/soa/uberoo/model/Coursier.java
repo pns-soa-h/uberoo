@@ -1,15 +1,13 @@
 package fr.unice.polytech.soa.uberoo.model;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 /**
  * Representation of coursier, delivering orders to client.
  *
  * @author Julien Lemaire
  */
+@Entity
 public class Coursier {
 	@Id
 	@GeneratedValue(strategy= GenerationType.AUTO)
@@ -17,4 +15,20 @@ public class Coursier {
 
 	@OneToOne
 	private Order order;
+
+	public Coursier() {
+
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public Order getOrder() {
+		return order;
+	}
+
+	public void setOrder(Order order) {
+		this.order = order;
+	}
 }
