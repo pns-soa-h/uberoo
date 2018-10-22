@@ -4,12 +4,15 @@ import com.jayway.jsonpath.JsonPath;
 import fr.unice.polytech.soa.uberoo.repository.OrderRepository;
 import org.hamcrest.core.IsNull;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -33,6 +36,15 @@ public class OrderControllerTest {
 
 	@Autowired
 	private OrderRepository repository;
+
+
+	@ClassRule
+	public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true, "order");
+
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		System.setProperty("spring.kafka.bootstrap-servers", embeddedKafka.getBrokersAsString());
+	}
 
 	@Before
 	public void deleteAllBeforeTests() {

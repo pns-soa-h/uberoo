@@ -17,6 +17,9 @@ import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,10 +33,14 @@ public class OrderController {
 	private final OrderResourceAssembler assembler;
 	private TimeETA timeETA;
 
-    @Autowired
-    public OrderController(OrderRepository repository, OrderResourceAssembler assembler) {
+	private KafkaTemplate<String, Order> kafkaTemplate;
+
+
+	@Autowired
+    public OrderController(OrderRepository repository, OrderResourceAssembler assembler, KafkaTemplate<String, Order> kafkaTemplate) {
         this.repository = repository;
         this.assembler = assembler;
+        this.kafkaTemplate = kafkaTemplate;
         this.timeETA = new TimeETAMock();
     }
 
@@ -80,6 +87,7 @@ public class OrderController {
 
 		if (order.getStatus() == Order.Status.IN_PROGRESS) {
 			order.setStatus(Order.Status.COMPLETED);
+			kafkaTemplate.send("order", order);
 			return ResponseEntity.ok(assembler.toResource(repository.save(order)));
 		}
 
