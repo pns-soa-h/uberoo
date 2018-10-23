@@ -13,8 +13,6 @@ import java.io.Serializable;
 public class Order implements Serializable {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
     private Long id;
 
     @OneToOne
@@ -23,14 +21,11 @@ public class Order implements Serializable {
 	@OneToOne
     private Coursier coursier;
 
-    @OneToOne
+    @Embedded
 	private Restaurant restaurant;
 
     @Column(name = "eta")
     private Long eta;
-
-	@Enumerated(EnumType.STRING)
-	private Status status;
 
 	public Order() {
     }
@@ -59,17 +54,13 @@ public class Order implements Serializable {
 		this.restaurant = restaurant;
 	}
 
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public Long getId() {
         return id;
     }
-
-    public Status getStatus() {
-    	return this.status;
-	}
-
-	public void setStatus(Status status) {
-    	this.status = status;
-	}
 
 	public Long getETA() {
     	return eta;
