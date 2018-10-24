@@ -13,8 +13,7 @@ public class Coursier {
 	@GeneratedValue(strategy= GenerationType.AUTO)
 	private Long id;
 
-	@OneToOne
-	private Order order;
+	private String name;
 
 	public Coursier() {
 
@@ -24,11 +23,11 @@ public class Coursier {
 		return id;
 	}
 
-	public Order getOrder() {
-		return order;
+	public String getName() {
+		return name;
 	}
 
-	public void setOrder(Order order) {
-		this.order = order;
+	public void setName(String name) {
+		this.name = name;
 	}
 }

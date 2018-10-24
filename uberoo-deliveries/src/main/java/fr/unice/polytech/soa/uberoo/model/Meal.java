@@ -18,7 +18,7 @@ public class Meal {
     @NotNull
     private String label;
 
-    @OneToOne
+    @Embedded
 	@NotNull
 	private Restaurant restaurant;
 
