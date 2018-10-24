@@ -23,7 +23,7 @@ public class OrderResourceAssembler implements ResourceAssembler<Order, Resource
 		// Unconditional links to single-item resource and aggregate root
 		Resource<Order> orderResource = new Resource<>(order,
 				linkTo(methodOn(OrderController.class).one(order.getId())).withSelfRel().expand(),
-				linkTo(methodOn(OrderController.class).all(null, null)).withRel("orders").expand()
+				linkTo(methodOn(OrderController.class).all()).withRel("orders").expand()
 		);
 		return orderResource;
 	}

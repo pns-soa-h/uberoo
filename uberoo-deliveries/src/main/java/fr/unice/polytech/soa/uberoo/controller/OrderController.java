@@ -6,16 +6,10 @@ import fr.unice.polytech.soa.uberoo.model.Order;
 import fr.unice.polytech.soa.uberoo.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.VndErrors;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -34,17 +28,14 @@ public class OrderController {
     }
 
 	@GetMapping("/orders")
-	public Resources<Resource<Order>> all(
-			@RequestParam(value = "status", required = false)Order.Status status,
-			@RequestParam(value = "restaurant", required = false) String restaurantName) {
+	public Resources<Resource<Order>> all() {
 
 		List<Resource<Order>> orders = repository.findAll().stream()
-				.filter(order -> restaurantName == null || order.getRestaurant().getName().toLowerCase().equals(restaurantName))
 				.map(assembler::toResource)
 				.collect(Collectors.toList());
 
 		return new Resources<>(orders,
-				linkTo(methodOn(OrderController.class).all(status, restaurantName)).withSelfRel());
+				linkTo(methodOn(OrderController.class).all()).withSelfRel());
 	}
 
 	@GetMapping("/orders/{id}")
