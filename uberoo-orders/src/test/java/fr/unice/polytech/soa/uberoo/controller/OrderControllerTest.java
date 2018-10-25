@@ -1,6 +1,9 @@
 package fr.unice.polytech.soa.uberoo.controller;
 
 import com.jayway.jsonpath.JsonPath;
+import fr.unice.polytech.soa.uberoo.model.Address;
+import fr.unice.polytech.soa.uberoo.model.Meal;
+import fr.unice.polytech.soa.uberoo.model.Restaurant;
 import fr.unice.polytech.soa.uberoo.repository.OrderRepository;
 import org.hamcrest.core.IsNull;
 import org.junit.Before;
@@ -34,6 +37,20 @@ public class OrderControllerTest {
 	@Autowired
 	private OrderRepository repository;
 
+	private Address shippingAddress;
+	private Address billingAddress;
+	private String clientId;
+	private Restaurant restaurant;
+	private Meal meal;
+
+	public OrderControllerTest() {
+		clientId = "15"; // arbitrary
+		shippingAddress = new Address("Alexis", "Couvreur", "2255 Route des Dolines", "", "Valbonne", "PACA", "06560", "France", "alexis.couvreur@etu.unice.fr", "0612345678");
+		billingAddress = shippingAddress; // My billing address is the same
+		restaurant = new Restaurant(12L, "Le Bon Burger");
+		meal = new Meal(42L, "XXL Mega Bacon", "Big burger with big bacon", 7.99, 2);
+	}
+
 	@Before
 	public void deleteAllBeforeTests() {
 		repository.deleteAll();
@@ -50,7 +67,7 @@ public class OrderControllerTest {
 	@Test
 	public void shouldCreateOrder() throws Exception {
 
-		mockMvc.perform(post("/orders")
+		/*mockMvc.perform(post("/orders")
 				.content("{\"clientId\": \"0\", \"mealId\":\"2\", \"restaurantId\":\"5\"}").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isCreated())
@@ -58,20 +75,23 @@ public class OrderControllerTest {
 				.andExpect(jsonPath("$.mealId").value("2"))
 				.andExpect(jsonPath("$.status").value("IN_PROGRESS"))
 				.andExpect(jsonPath("$.coursierId").value(IsNull.nullValue()))
-				.andExpect(jsonPath("$.eta").value(1200000));
-
+				.andExpect(jsonPath("$.eta").value(1200000));*/
+		createOrderAndValidate(clientId, meal, restaurant, shippingAddress, billingAddress);
 	}
 
 
 	@Test
 	public void shouldRetrieveAllOrders() throws Exception {
 
-		mockMvc.perform(post("/orders").content("{\"clientId\": \"0\", \"mealId\":\"2\", \"restaurantId\":\"5\"}").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated());
-		mockMvc.perform(post("/orders").content("{\"clientId\": \"1\", \"mealId\":\"3\", \"restaurantId\":\"1\"}").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated());
-		mockMvc.perform(post("/orders").content("{\"clientId\": \"2\", \"mealId\":\"1\", \"restaurantId\":\"7\"}").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated());
+		Restaurant r5 = new Restaurant(5L, "Le poisson gourmand");
+		Restaurant r7 = new Restaurant(7L, "L'assiette creuse");
+
+		Meal m2 = new Meal(2L, "Baguette", "Une baguette quoi", 0.99, 1);
+		Meal m5 = new Meal(5L, "Croissant", "Un croissant au beurre...", 0.59, 4);
+
+		createOrderAndValidate(clientId, meal, restaurant, shippingAddress, billingAddress);
+		createOrderAndValidate(clientId, m2, r5, shippingAddress, billingAddress);
+		createOrderAndValidate(clientId, m5, r7, shippingAddress, billingAddress);
 
 		mockMvc.perform(get("/orders"))
 				.andDo(print())
@@ -93,10 +113,7 @@ public class OrderControllerTest {
 	@Test
 	public void shouldRetrieveOneOrder() throws Exception {
 
-		String clientId = "0";
-		String mealId = "2";
-		String restaurantId = "12";
-		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
+		MvcResult result = createOrderAndValidate(clientId, meal, restaurant, shippingAddress, billingAddress);
 
 		// Get order ref
 		String selfOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.self.href").toString();
@@ -105,8 +122,8 @@ public class OrderControllerTest {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.clientId").value(clientId))
-				.andExpect(jsonPath("$.mealId").value(mealId))
-				.andExpect(jsonPath("$.restaurantId").value(restaurantId))
+				.andExpect(jsonPath("$.meal.id").value(meal.getId()))
+				.andExpect(jsonPath("$.restaurant.id").value(restaurant.getId()))
 				.andExpect(jsonPath("$.status").value("IN_PROGRESS"))
 				.andExpect(jsonPath("$.coursierId").value(IsNull.nullValue()))
 				.andExpect(jsonPath("$.eta").value(1200000));
@@ -115,42 +132,36 @@ public class OrderControllerTest {
 	}
 
 	@Test
-	public void shouldSetStatusToCompleted() throws Exception {
+	public void shouldSetStatusToAccepted() throws Exception {
 
-		String clientId = "0";
-		String mealId = "2";
-		String restaurantId = "12";
-		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
+		MvcResult result = createOrderAndValidate(clientId, meal, restaurant, shippingAddress, billingAddress);
 
 		// Get order ref
-		String completeOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.complete.href").toString();
+		String updateStatus = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.update.href").toString();
 
-		 mockMvc.perform(put(completeOrder)
-				.content("").contentType(MediaType.APPLICATION_JSON))
+		 mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"ACCEPTED\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				 .andExpect(jsonPath("$.status").value("COMPLETED"));
+				 .andExpect(jsonPath("$.status").value("ACCEPTED"));
 	}
 
 	@Test
 	public void shouldThrowExceptionSettingStatusToCompleted() throws Exception {
 
-		String clientId = "0";
-		String mealId = "2";
-		String restaurantId = "12";
-		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
+		MvcResult result = createOrderAndValidate(clientId, meal, restaurant, shippingAddress, billingAddress);
 
 		// Get order ref
-		String completeOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.complete.href").toString();
+		String updateStatus = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.update.href").toString();
 
-		mockMvc.perform(put(completeOrder)
-				.content("").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"ACCEPTED\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.status").value("COMPLETED"));
+				.andExpect(jsonPath("$.status").value("ACCEPTED"));
 
-		mockMvc.perform(put(completeOrder)
-				.content("").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"ACCEPTED\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isMethodNotAllowed());
 	}
@@ -158,114 +169,137 @@ public class OrderControllerTest {
 	@Test
 	public void shouldSetStatusToCancelled() throws Exception {
 
-		String clientId = "0";
-		String mealId = "2";
-		String restaurantId = "12";
-		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
+		MvcResult result = createOrderAndValidate(clientId, meal, restaurant, shippingAddress, billingAddress);
 
 		// Get order ref
-		String cancelOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.cancel.href").toString();
+		String updateStatus = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.update.href").toString();
 
-		mockMvc.perform(delete(cancelOrder)
-				.content("").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"CANCELLED\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.status").value("CANCELLED"))
-				.andReturn();
-
+				.andExpect(jsonPath("$.status").value("CANCELLED"));
 	}
 
 	@Test
 	public void shouldThrowExceptionSettingStatusToCancelled() throws Exception {
 
-		String clientId = "0";
-		String mealId = "2";
-		String restaurantId = "12";
-		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
+		MvcResult result = createOrderAndValidate(clientId, meal, restaurant, shippingAddress, billingAddress);
 
 		// Get order ref
-		String cancelOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.cancel.href").toString();
+		String updateStatus = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.update.href").toString();
 
-		mockMvc.perform(delete(cancelOrder)
-				.content("").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"CANCELLED\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.status").value("CANCELLED"))
-				.andReturn();
+				.andExpect(jsonPath("$.status").value("CANCELLED"));
 
-		mockMvc.perform(delete(cancelOrder)
-				.content("").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"CANCELLED\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isMethodNotAllowed());
 	}
 
 	@Test
-	public void shouldSetStatusToAssigned() throws Exception {
+	public void shouldSetStatusToInTransit() throws Exception {
 
-		String clientId = "0";
-		String mealId = "2";
-		String restaurantId = "12";
-		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
-
-		// Need to be completed to have assign link
-		String completeOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.complete.href").toString();
-
-		MvcResult completeResult = mockMvc.perform(put(completeOrder)
-				.content("").contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.status").value("COMPLETED"))
-				.andReturn();
+		MvcResult result = createOrderAndValidate(clientId, meal, restaurant, shippingAddress, billingAddress);
 
 		// Get order ref
-		String assignOrder = JsonPath.parse(completeResult.getResponse().getContentAsString()).read("$._links.assign.href").toString();
+		String updateStatus = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.update.href").toString();
 
-		mockMvc.perform(put(assignOrder)
-				.content("{\"coursierId\": \"12\"}").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"ACCEPTED\" }").contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk());
+
+		//Restaurant preparing
+		mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"IN_PREPARATION\" }").contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk());
+
+		mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"IN_TRANSIT\", \"coursierId\": \"12\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.status").value("ASSIGNED"))
-				.andExpect(jsonPath("$.coursierId").value("12"));
+				.andExpect(jsonPath("$.status").value("IN_TRANSIT"));
 
 	}
 
 	@Test
-	public void shouldThrowExceptionSettingStatusToAssigned() throws Exception {
+	public void shouldThrowExceptionSettingStatusToInTransit() throws Exception {
 
-		String clientId = "0";
-		String mealId = "2";
-		String restaurantId = "12";
-		MvcResult result = createOrderAndValidate(clientId, mealId, restaurantId);
-
-		// Need to be completed to have assign link
-		String completeOrder = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.complete.href").toString();
-
-		MvcResult completeResult = mockMvc.perform(put(completeOrder)
-				.content("").contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.status").value("COMPLETED"))
-				.andReturn();
+		MvcResult result = createOrderAndValidate(clientId, meal, restaurant, shippingAddress, billingAddress);
 
 		// Get order ref
-		String assignOrder = JsonPath.parse(completeResult.getResponse().getContentAsString()).read("$._links.assign.href").toString();
+		String updateStatus = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.update.href").toString();
 
-		mockMvc.perform(put(assignOrder)
-				.content("{\"coursierId\": \"12\"}").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"ACCEPTED\" }").contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk());
+
+		//Restaurant preparing
+		mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"IN_PREPARATION\" }").contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk());
+
+		mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"IN_TRANSIT\", \"coursierId\": \"12\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.status").value("ASSIGNED"))
-				.andExpect(jsonPath("$.coursierId").value("12"));
+				.andExpect(jsonPath("$.status").value("IN_TRANSIT"));
 
-		mockMvc.perform(put(assignOrder)
-				.content("{\"coursierId\": \"12\"}").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(patch(updateStatus)
+				.content("{ \"status\": \"IN_TRANSIT\", \"coursierId\": \"12\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isMethodNotAllowed());
 	}
 
-	private MvcResult createOrderAndValidate(String clientId, String mealId, String restaurantId) throws Exception {
+	private MvcResult createOrderAndValidate(String clientId, Meal meal, Restaurant restaurant, Address shipping, Address billing) throws Exception {
+
+		String request =
+				"{\"client\": \"" + clientId + "\"" +
+				", \"meal\": {" +
+					"\"id\": \"" + meal.getId() + "\"" +
+					", \"name\": \"" + meal.getName() + "\"" +
+					", \"description\": \"" + meal.getDescription() + "\"" +
+					", \"price\": \"" + meal.getPrice() + "\"" +
+					", \"quantity\": \"" + meal.getQuantity() + "\"" +
+				"}" +
+				", \"restaurant\": {" +
+					"\"id\": \"" + restaurant.getId() + "\"" +
+					", \"name\": \"" + restaurant.getName() + "\"" +
+				"}" +
+				", \"shippingAddress\": {" +
+					"\"firstName\": \"" + shipping.getFirstName() + "\"" +
+					", \"lastName\": \"" + shipping.getLastName() + "\"" +
+					", \"address_1\": \"" + shipping.getAddress_1() + "\"" +
+					", \"address_2\": \"" + shipping.getAddress_2() + "\"" +
+					", \"city\": \"" + shipping.getCity() + "\"" +
+					", \"state\": \"" + shipping.getState() + "\"" +
+					", \"postcode\": \"" + shipping.getPostcode() + "\"" +
+					", \"country\": \"" + shipping.getCountry() + "\"" +
+					", \"email\": \"" + shipping.getEmail() + "\"" +
+					", \"phone\": \"" + shipping.getPhone() + "\"" +
+				"}" +
+				", \"billingAddress\": {" +
+					"\"firstName\": \"" + billing.getFirstName() + "\"" +
+					", \"lastName\": \"" + billing.getLastName() + "\"" +
+					", \"address_1\": \"" + billing.getAddress_1() + "\"" +
+					", \"address_2\": \"" + billing.getAddress_2() + "\"" +
+					", \"city\": \"" + billing.getCity() + "\"" +
+					", \"state\": \"" + billing.getState() + "\"" +
+					", \"postcode\": \"" + billing.getPostcode() + "\"" +
+					", \"country\": \"" + billing.getCountry() + "\"" +
+					", \"email\": \"" + billing.getEmail() + "\"" +
+					", \"phone\": \"" + shipping.getPhone() + "\"" +
+				"}}" ;
 		return mockMvc.perform(post("/orders")
-				.content("{\"clientId\": \"" + clientId + "\", \"mealId\":\"" + mealId + "\", \"restaurantId\": \"" + restaurantId + "\"}").contentType(MediaType.APPLICATION_JSON))
+				.content(request).contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andDo(print())
 				.andExpect(status().isCreated())
 				.andReturn();

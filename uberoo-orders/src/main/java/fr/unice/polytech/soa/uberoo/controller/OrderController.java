@@ -9,6 +9,7 @@ import fr.unice.polytech.soa.uberoo.exception.MalformedException;
 import fr.unice.polytech.soa.uberoo.exception.OrderNotFoundException;
 import fr.unice.polytech.soa.uberoo.exception.BodyMemberNotFoundException;
 import fr.unice.polytech.soa.uberoo.model.Order;
+import fr.unice.polytech.soa.uberoo.model.OrderRequest;
 import fr.unice.polytech.soa.uberoo.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
@@ -16,6 +17,7 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,7 +46,7 @@ public class OrderController {
 
 		List<Resource<Order>> orders = repository.findAll().stream()
 				.filter(order -> status == null || order.getStatus() == status)
-				.filter(order -> restaurantId == null || order.getRestaurantId().equals(restaurantId))
+				.filter(order -> restaurantId == null || order.getRestaurant().getId().equals(restaurantId))
 				.map(assembler::toResource)
 				.collect(Collectors.toList());
 
@@ -59,11 +61,13 @@ public class OrderController {
 						.orElseThrow(() -> new OrderNotFoundException(id)));
 	}
 
-	@PostMapping("/orders")
-	public ResponseEntity<Resource<Order>> newOrder(@RequestBody Order order) {
+	@PostMapping(value = "/orders", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<Resource<Order>> newOrder(@RequestBody OrderRequest orderRequest) {
 
+		System.out.println(orderRequest);
+    	Order order = new Order(orderRequest);
 		order.setStatus(Order.Status.IN_PROGRESS);
-		order.setETA(timeETA.calculateOrderETA(order, null));
+		order.setEta(timeETA.calculateOrderETA(order, null));
 
 		Order newOrder = repository.save(order);
 
@@ -73,48 +77,40 @@ public class OrderController {
 	}
 
 
-	@PutMapping("/orders/{id}/complete")
-	public ResponseEntity<ResourceSupport> complete(@PathVariable Long id) {
+	@PatchMapping("/orders/{id}/status")
+	public ResponseEntity<ResourceSupport> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> map) {
 
-		Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
-
-		if (order.getStatus() == Order.Status.IN_PROGRESS) {
-			order.setStatus(Order.Status.COMPLETED);
-			return ResponseEntity.ok(assembler.toResource(repository.save(order)));
+    	String strStatus = map.get("status");
+    	if(strStatus == null) {
+			throw new BodyMemberNotFoundException("status");
 		}
 
-		return ResponseEntity
-				.status(HttpStatus.METHOD_NOT_ALLOWED)
-				.body(new VndErrors.VndError("Method not allowed", "You can't complete an order that is in the " + order.getStatus() + " status"));
-	}
-
-	@DeleteMapping("/orders/{id}/cancel")
-	public ResponseEntity<ResourceSupport> cancel(@PathVariable Long id) {
-
 		Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
+		Order.Status status = Order.Status.valueOf(strStatus);
 
-		if (order.getStatus() == Order.Status.IN_PROGRESS) {
-			order.setStatus(Order.Status.CANCELLED);
-			return ResponseEntity.ok(assembler.toResource(repository.save(order)));
+		// If you're cancelling an order that is not cancellable anymore
+		if(status.equals(Order.Status.CANCELLED) && !order.getStatus().equals(Order.Status.IN_PROGRESS)) {
+			return ResponseEntity
+					.status(HttpStatus.METHOD_NOT_ALLOWED)
+					.body(new VndErrors.VndError("Method not allowed", "(1) You can't set an order that is " + order.getStatus().toString() + " into " + status.toString()));
 		}
 
-		return ResponseEntity
-				.status(HttpStatus.METHOD_NOT_ALLOWED)
-				.body(new VndErrors.VndError("Method not allowed", "You can't cancel an order that is in the " + order.getStatus() + " status"));
-	}
+		// If you're not updating the status to the next step
+		if(!status.equals(Order.Status.CANCELLED) && !order.getStatus().next().equals(status)) {
+			return ResponseEntity
+					.status(HttpStatus.METHOD_NOT_ALLOWED)
+					.body(new VndErrors.VndError("Method not allowed", "(2) You can't set an order that is " + order.getStatus().toString() + " into " + status.toString()));
+		}
 
 
-    @PutMapping(value = "/orders/{id}/assign")
-    public ResponseEntity<ResourceSupport> assign(@PathVariable("id") Long id, @RequestBody() Map<String, String> body) {
-
-		Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
-
-		if (order.getStatus() == Order.Status.COMPLETED) {
-			order.setStatus(Order.Status.ASSIGNED);
+		// Special case for delivery, body contains coursier id
+		// /!\ DEPRECATED /!\
+		if (order.getStatus() == Order.Status.IN_PREPARATION) {
+			order.setStatus(Order.Status.IN_TRANSIT);
 
 			// Retrieve coursierId from body and check if present
-			String coursierId = body.get("coursierId");
-			if(coursierId == null) {
+			String coursierId = map.get("coursierId");
+			if (coursierId == null) {
 				// else 422
 				throw new BodyMemberNotFoundException("coursierId");
 			}
@@ -126,11 +122,11 @@ public class OrderController {
 				// Else 422 ...
 				throw new MalformedException("coursierId", "number");
 			}
-			return ResponseEntity.ok(assembler.toResource(repository.save(order)));
 		}
 
-		return ResponseEntity
-				.status(HttpStatus.METHOD_NOT_ALLOWED)
-				.body(new VndErrors.VndError("Method not allowed", "You can't complete an order that is in the " + order.getStatus() + " status"));
-    }
+		order.setStatus(status);
+
+		return ResponseEntity.ok(assembler.toResource(repository.save(order)));
+
+	}
 }
