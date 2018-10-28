@@ -1,6 +1,9 @@
 package fr.unice.polytech.soa.uberoo;
 
-import fr.unice.polytech.soa.uberoo.model.Order;
+import fr.unice.polytech.soa.uberoo.model.Payment;
+import fr.unice.polytech.soa.uberoo.repository.OrderRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
@@ -9,9 +12,12 @@ import org.springframework.stereotype.Component;
 public class KafkaListenerBean {
 
 
-	@KafkaListener(topics = "order")
-	public void deliver(Order order, Acknowledgment acknowledgment) {
-		System.out.println("Completed order id : " + order.getId());
+
+	@Autowired
+	private OrderRepository orderRepository;
+	
+	@KafkaListener(topics = "payment")
+	public void deliver(Payment payment, Acknowledgment acknowledgment) {
 		acknowledgment.acknowledge();
 	}
 
