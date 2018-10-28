@@ -22,9 +22,6 @@ public class Meal {
 	@NotNull
 	private Restaurant restaurant;
 
-    @OneToOne
-    private Tag tag;
-
     @NotNull
     private String description;
 
@@ -36,11 +33,6 @@ public class Meal {
     	this.label = label;
     	this.description = description;
     	this.restaurant = restaurant;
-    }
-
-    public Meal(String label, String description, Restaurant restaurant, Tag tag) {
-    	this(label, description, restaurant);
-    	this.tag = tag;
     }
 
     public Long getId() {
@@ -57,14 +49,6 @@ public class Meal {
 
     public void setLabel(String label) {
         this.label = label;
-    }
-
-    public Tag getTag() {
-        return tag;
-    }
-
-    public void setTag(Tag tag) {
-        this.tag = tag;
     }
 
     public String getDescription() {
@@ -90,12 +74,11 @@ public class Meal {
 		Meal meal = (Meal) o;
 		return Objects.equals(label, meal.label) &&
 				Objects.equals(restaurant, meal.restaurant) &&
-				Objects.equals(tag, meal.tag) &&
 				Objects.equals(description, meal.description);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(label, restaurant, tag, description);
+		return Objects.hash(label, restaurant, description);
 	}
 }

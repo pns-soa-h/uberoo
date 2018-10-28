@@ -1,4 +1,5 @@
 #!/bin/bash
 
-mvn package
+mvn clean package
+docker-compose build
 docker build -t uberoo-scenario ./uberoo-scenario/docker
