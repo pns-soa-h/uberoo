@@ -32,7 +32,19 @@ services:
     image: soa-uberoo-deliveries
     container_name: uberoo-deliveries
     ports:
-    - "127.0.0.1:8182:8080"
+    - "127.0.0.1:8282:8080"
+    links:
+    - kafka
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  uberoo-payments:
+    build:
+      context: uberoo-payments
+      dockerfile: docker/Dockerfile
+    image: soa-uberoo-payments
+    container_name: uberoo-payments
+    ports:
+    - "127.0.0.1:8484:8080"
     links:
     - kafka
     environment:
