@@ -1,6 +1,6 @@
 package fr.unice.polytech.soa.uberoo.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -9,20 +9,15 @@ import java.io.Serializable;
  * Created by Alexis Couvreur on 9/24/2018.
  */
 @Entity(name = "OrderDelivery")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Order implements Serializable {
 
     @Id
     private Long id;
 
-    @OneToOne
+    @Embedded
     private Meal meal;
 
-	@OneToOne
     private Coursier coursier;
-
-    @Embedded
-	private Restaurant restaurant;
 
     @Column(name = "eta")
     private Long eta;
@@ -44,14 +39,6 @@ public class Order implements Serializable {
 
 	public void setCoursier(Coursier coursier) {
 		this.coursier = coursier;
-	}
-
-	public Restaurant getRestaurant() {
-		return restaurant;
-	}
-
-	public void setRestaurant(Restaurant restaurant) {
-		this.restaurant = restaurant;
 	}
 
 	public void setId(Long id) {

@@ -53,4 +53,5 @@ public class CoursierController {
 
 		return assembler.toResource(coursier);
 	}
+
 }
