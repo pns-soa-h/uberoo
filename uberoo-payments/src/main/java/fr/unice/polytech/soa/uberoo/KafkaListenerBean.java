@@ -2,9 +2,9 @@ package fr.unice.polytech.soa.uberoo;
 
 import fr.unice.polytech.soa.uberoo.model.Addition;
 import fr.unice.polytech.soa.uberoo.model.Order;
-import fr.unice.polytech.soa.uberoo.model.Recu;
+import fr.unice.polytech.soa.uberoo.model.Recipe;
 import fr.unice.polytech.soa.uberoo.repository.OrderRepository;
-import fr.unice.polytech.soa.uberoo.repository.RecuRepository;
+import fr.unice.polytech.soa.uberoo.repository.RecipeRepository;
 
 import java.util.Date;
 
@@ -23,25 +23,29 @@ public class KafkaListenerBean {
 	private OrderRepository orderRepository;
 	
 	@Autowired
-	private RecuRepository recuRepository;
+	private RecipeRepository recipeRepository;
 	
-	private KafkaTemplate<String, Recu> kafkaTemplate;
+	@Autowired
+	private KafkaTemplate<String, Recipe> recipeTemplate;
+	
+	@Autowired
+	private KafkaTemplate<String, String> errorTemplate;
+	
 	
 	
 	@KafkaListener(topics = "payment")
 	public void deliver(Addition payment, Acknowledgment acknowledgment) {
-		acknowledgment.acknowledge();
 		Order o = orderRepository.findById(payment.getOrderId()).orElse(null);
 		if(o == null) {
-			//do order not found
+			errorTemplate.send("paymentError", "Order : "+payment.getOrderId()+" does not exist");
 			return;
 		}
-		if(recuRepository.findById(payment.getOrderId()).orElse(null)!=null) {
-			//do alreadt paid;
+		if(recipeRepository.findById(payment.getOrderId()).orElse(null)!=null) {
+			errorTemplate.send("paymentError", "Order : "+payment.getOrderId()+" is already paid");
 			return;
 		}
-		kafkaTemplate.send("recu", new Recu(payment.getOrderId(),payment.getMontant(),new Date(System.currentTimeMillis())));
-		
+		recipeTemplate.send("recipe", new Recipe(payment.getOrderId(),payment.getMontant(),new Date(System.currentTimeMillis())));
+		acknowledgment.acknowledge();
 	}
 
 }

@@ -1,17 +1,23 @@
 package fr.unice.polytech.soa.uberoo.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 
-@Entity
-public class Recu {
+@Entity(name = "RecipeOrder")
+public class Recipe implements Serializable{
 
-	
+	@Column(name = "orderId", nullable = false)
 	private Long orderId;
+	
+	@Column(name = "montant", nullable = false)
 	private float montant;
+	@Column(name = "timestamp")
 	private Date timestamp;
-	public Recu(Long orderId, float montant, Date timestamp) {
+	
+	public Recipe(Long orderId, float montant, Date timestamp) {
 		super();
 		this.orderId = orderId;
 		this.montant = montant;
