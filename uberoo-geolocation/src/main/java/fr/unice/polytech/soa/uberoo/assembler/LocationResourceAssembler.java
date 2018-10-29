@@ -19,8 +19,9 @@ public class LocationResourceAssembler implements ResourceAssembler<Location, Re
 	@Override
 	public Resource<Location> toResource(Location location) {
 
+		// TODO: 10/29/18 find how the fuck this works
 		return new Resource<>(location,
-				linkTo(methodOn(GeolocationController.class).location(location.getPlace())).withSelfRel().expand()
+				linkTo(methodOn(GeolocationController.class).location(0L)).withSelfRel().expand()
 		);
 	}
 }
