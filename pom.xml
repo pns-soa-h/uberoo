@@ -17,6 +17,7 @@
 
     <modules>
 	    <module>uberoo-deliveries</module>
+	    <module>uberoo-geolocation</module>
 	    <module>uberoo-meals</module>
         <module>uberoo-orders</module>
     </modules>

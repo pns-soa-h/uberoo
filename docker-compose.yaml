@@ -32,7 +32,19 @@ services:
     image: soa-uberoo-deliveries
     container_name: uberoo-deliveries
     ports:
-    - "127.0.0.1:8182:8080"
+    - "127.0.0.1:8282:8080"
+    links:
+    - kafka
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  uberoo-geolocation:
+    build:
+      context: uberoo-geolocation
+      dockerfile: docker/Dockerfile
+    image: soa-uberoo-geolocation
+    container_name: uberoo-geolocation
+    ports:
+    - "127.0.0.1:8383:8080"
     links:
     - kafka
     environment:
