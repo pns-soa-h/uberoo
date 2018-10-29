@@ -44,7 +44,7 @@ public class KafkaListenerBean {
 			errorTemplate.send("paymentError", "Order : "+payment.getOrderId()+" is already paid");
 			return;
 		}
-		recipeTemplate.send("recipe", new Recipe(payment.getOrderId(),payment.getMontant(),new Date(System.currentTimeMillis())));
+		recipeTemplate.send("recipe", new Recipe(payment.getOrderId(),payment.getMontant(),new Date(System.currentTimeMillis()),payment.getPaymentMethod()));
 		acknowledgment.acknowledge();
 	}
 

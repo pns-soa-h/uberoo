@@ -5,6 +5,10 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+
+import fr.unice.polytech.soa.uberoo.model.Addition.Method;
 
 @Entity(name = "RecipeOrder")
 public class Recipe implements Serializable{
@@ -16,12 +20,21 @@ public class Recipe implements Serializable{
 	private float montant;
 	@Column(name = "timestamp")
 	private Date timestamp;
+	@Enumerated(EnumType.STRING)
+	private Method paymentMethod;
 	
-	public Recipe(Long orderId, float montant, Date timestamp) {
+	public Recipe(Long orderId, float montant, Date timestamp, Method paymentMethod) {
 		super();
 		this.orderId = orderId;
 		this.montant = montant;
 		this.timestamp = timestamp;
+		this.paymentMethod = paymentMethod;
+	}
+	public Method getPaymentMethod() {
+		return paymentMethod;
+	}
+	public void setPaymentMethod(Method paymentMethod) {
+		this.paymentMethod = paymentMethod;
 	}
 	public Long getOrderId() {
 		return orderId;
