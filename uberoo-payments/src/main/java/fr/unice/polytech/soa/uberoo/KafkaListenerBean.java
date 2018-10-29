@@ -1,7 +1,9 @@
 package fr.unice.polytech.soa.uberoo;
 
-import fr.unice.polytech.soa.uberoo.model.Payment;
+import fr.unice.polytech.soa.uberoo.model.Addition;
+import fr.unice.polytech.soa.uberoo.model.Order;
 import fr.unice.polytech.soa.uberoo.repository.OrderRepository;
+import fr.unice.polytech.soa.uberoo.repository.RecuRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,9 +18,22 @@ public class KafkaListenerBean {
 	@Autowired
 	private OrderRepository orderRepository;
 	
+	@Autowired
+	private RecuRepository recuRepository;
+	
 	@KafkaListener(topics = "payment")
-	public void deliver(Payment payment, Acknowledgment acknowledgment) {
+	public void deliver(Addition payment, Acknowledgment acknowledgment) {
 		acknowledgment.acknowledge();
+		Order o = orderRepository.findById(payment.getOrderId()).orElse(null);
+		if(o == null) {
+			//do order not found
+			return;
+		}
+		if(recuRepository.findById(payment.getOrderId()).orElse(null)!=null) {
+			//do alreadt paid;
+			return;
+		}
+		
 	}
 
 }
