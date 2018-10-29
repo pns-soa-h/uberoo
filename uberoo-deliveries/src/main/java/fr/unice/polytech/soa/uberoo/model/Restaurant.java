@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Embeddable
 public class Restaurant {
 
-	@Column(unique = true)
+	@Column(name = "restaurantName", unique = true)
     private String name;
 
 	public Restaurant() {

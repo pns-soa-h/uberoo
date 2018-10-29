@@ -7,12 +7,8 @@ import java.util.Objects;
 /**
  * Created by Alexis Couvreur on 9/24/2018.
  */
-@Entity
+@Embeddable
 public class Meal {
-
-    @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
 
     @Column(unique = true)
     @NotNull
@@ -33,14 +29,6 @@ public class Meal {
     	this.label = label;
     	this.description = description;
     	this.restaurant = restaurant;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getLabel() {
