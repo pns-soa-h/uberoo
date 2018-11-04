@@ -36,24 +36,27 @@ public class GeolocationController {
 	}
 
 	@GetMapping("/coursiers")
-	public Resources<Resource<Coursier>> all() {
-		List<Resource<Coursier>> coursiers = repository.findAll().stream()
+	public Resources <Resource <Coursier>> all() {
+		List <Resource <Coursier>> coursiers = repository.findAll().stream()
 				.map(assembler::toResource)
 				.collect(Collectors.toList());
-		return new Resources<>(coursiers,
+		return new Resources <>(coursiers,
 				linkTo(methodOn(GeolocationController.class).all()).withRel("coursiers"));
 	}
 
 	@GetMapping("/coursiers/{id}")
-	public Resource<Coursier> one(@PathVariable Long id) {
+	public Resource <Coursier> one(@PathVariable Long id) {
 		return assembler.toResource(
 				repository.findById(id)
 						.orElseThrow(() -> new CoursierNotFoundException(id)));
 	}
 
 	@GetMapping("/coursiers/{id}/location")
-	public Resource<Location> location(@PathVariable Long id) {
-		return locationAssembler.toResource(one(id).getContent().getLocation());
+	public Resource <Location> location(@PathVariable Long id) {
+		return locationAssembler.toResource(
+				repository.findById(id)
+						.orElseThrow(() -> new CoursierNotFoundException(id))
+						.getLocation());
 	}
 
 }
