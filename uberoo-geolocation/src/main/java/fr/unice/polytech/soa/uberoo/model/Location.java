@@ -8,6 +8,10 @@ public class Location {
 	@Column(name = "place")
 	private String place;
 
+	public Location(){
+
+	}
+
 	public Location(String place) {
 		this.place = place;
 	}

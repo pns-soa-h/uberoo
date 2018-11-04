@@ -21,7 +21,7 @@ public class LocationResourceAssembler implements ResourceAssembler<Location, Re
 
 		// TODO: 10/29/18 find how the fuck this works
 		return new Resource<>(location,
-				linkTo(methodOn(GeolocationController.class).location(0L)).withSelfRel().expand()
+				linkTo(methodOn(GeolocationController.class).location(null)).withSelfRel()
 		);
 	}
 }

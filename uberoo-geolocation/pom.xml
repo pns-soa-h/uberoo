@@ -6,14 +6,6 @@
     <artifactId>uberoo-geolocation</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
-    <dependencies>
-        <dependency>
-            <groupId>fr.unice.polytech.soa.h</groupId>
-            <artifactId>uberoo-orders</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
     <name>SOA :: Uberoo :: Geolocation</name>
 
     <parent>

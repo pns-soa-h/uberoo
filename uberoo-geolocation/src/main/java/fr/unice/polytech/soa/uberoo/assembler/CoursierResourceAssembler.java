@@ -19,9 +19,8 @@ public class CoursierResourceAssembler implements ResourceAssembler<Coursier, Re
 	public Resource<Coursier> toResource(Coursier coursier) {
 
 		return new Resource<>(coursier,
-				linkTo(methodOn(GeolocationController.class).one(coursier.getId())).withSelfRel().expand(),
-				linkTo(methodOn(GeolocationController.class).all(null)).withRel("coursiers").expand(),
-				linkTo(methodOn(GeolocationController.class).location(coursier.getId())).withRel("coursiers").expand()
+				linkTo(methodOn(GeolocationController.class).one(coursier.getId())).withSelfRel(),
+				linkTo(methodOn(GeolocationController.class).all()).withRel("coursiers")
 		);
 	}
 }
