@@ -9,7 +9,6 @@ import fr.unice.polytech.soa.uberoo.exception.MalformedException;
 import fr.unice.polytech.soa.uberoo.exception.OrderNotFoundException;
 import fr.unice.polytech.soa.uberoo.exception.BodyMemberNotFoundException;
 import fr.unice.polytech.soa.uberoo.model.Order;
-import fr.unice.polytech.soa.uberoo.model.OrderRequest;
 import fr.unice.polytech.soa.uberoo.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
@@ -19,9 +18,8 @@ import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +31,7 @@ public class OrderController {
 
     private final OrderRepository repository;
 	private final OrderResourceAssembler assembler;
+
 	private TimeETA timeETA;
 
 	private KafkaTemplate<String, Order> kafkaTemplate;
@@ -69,12 +68,13 @@ public class OrderController {
 	}
 
 	@PostMapping(value = "/orders", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<Resource<Order>> newOrder(@RequestBody OrderRequest orderRequest) {
+	public ResponseEntity<Resource<Order>> newOrder(@RequestBody Order order) {
 
-		System.out.println(orderRequest);
-    	Order order = new Order(orderRequest);
 		order.setStatus(Order.Status.IN_PROGRESS);
 		order.setEta(timeETA.calculateOrderETA(order, null));
+
+		// Ask for total
+		kafkaTemplate.send("order_need_total", order);
 
 		Order newOrder = repository.save(order);
 
@@ -84,7 +84,7 @@ public class OrderController {
 	}
 
 
-	@PatchMapping("/orders/{id}/status")
+	@PatchMapping(value = "/orders/{id}/status", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<ResourceSupport> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> map) {
 
     	String strStatus = map.get("status");
@@ -131,9 +131,24 @@ public class OrderController {
 			}
 		}
 
+		if(status == Order.Status.ACCEPTED) {
+			String paymentMethod = map.get("payment_method");
+			if(paymentMethod == null) {
+				throw new BodyMemberNotFoundException("payment_method");
+			}
+
+			if(paymentMethod.equals("cb")) {
+				// Send msg pay this
+			}
+		}
+		switch (status) {
+			case ACCEPTED:
+				kafkaTemplate.send("order_need_total", order);
+				break;
+		}
+
 		order.setStatus(status);
-
+		kafkaTemplate.send("order_status_" + status.name().toLowerCase(), order);
 		return ResponseEntity.ok(assembler.toResource(repository.save(order)));
-
 	}
 }

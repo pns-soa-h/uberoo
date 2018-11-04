@@ -1,9 +1,7 @@
 package fr.unice.polytech.soa.uberoo.controller;
 
 import com.jayway.jsonpath.JsonPath;
-import fr.unice.polytech.soa.uberoo.model.Address;
-import fr.unice.polytech.soa.uberoo.model.Meal;
-import fr.unice.polytech.soa.uberoo.model.Restaurant;
+import fr.unice.polytech.soa.uberoo.model.*;
 import fr.unice.polytech.soa.uberoo.repository.OrderRepository;
 import org.hamcrest.core.IsNull;
 import org.junit.Before;
@@ -40,18 +38,18 @@ public class OrderControllerTest {
 	@Autowired
 	private OrderRepository repository;
 
-	private Address shippingAddress;
-	private Address billingAddress;
+	private ShippingAddress shippingAddress;
+	private BillingAddress billingAddress;
 	private String clientId;
 	private Restaurant restaurant;
 	private Meal meal;
 
 	public OrderControllerTest() {
 		clientId = "15"; // arbitrary
-		shippingAddress = new Address("Alexis", "Couvreur", "2255 Route des Dolines", "", "Valbonne", "PACA", "06560", "France", "alexis.couvreur@etu.unice.fr", "0612345678");
+		shippingAddress = new ShippingAddress("Alexis", "Couvreur", null, "2255 Route des Dolines", null, "Valbonne", "06560", "France", "alexis.couvreur@etu.unice.fr", "0612345678");
 		billingAddress = shippingAddress; // My billing address is the same
-		restaurant = new Restaurant(12L, "Le Bon Burger");
-		meal = new Meal(42L, "XXL Mega Bacon", "Big burger with big bacon", 7.99, 2);
+		restaurant = new Restaurant(12L, "Le Bon Burger", new Address("1 Place Joseph Bermond", null, "Valbonne", "06560", "France"));
+		meal = new Meal(42L, 2);
 	}
 
 	@ClassRule
@@ -94,11 +92,11 @@ public class OrderControllerTest {
 	@Test
 	public void shouldRetrieveAllOrders() throws Exception {
 
-		Restaurant r5 = new Restaurant(5L, "Le poisson gourmand");
-		Restaurant r7 = new Restaurant(7L, "L'assiette creuse");
+		Restaurant r5 = new Restaurant(5L, "Le poisson gourmand", new Address("1 Place Joseph Bermond", null, "Valbonne", "06560", "France"));
+		Restaurant r7 = new Restaurant(7L, "L'assiette creuse", new Address("1 Place Joseph Bermond", null, "Valbonne", "06560", "France"));
 
-		Meal m2 = new Meal(2L, "Baguette", "Une baguette quoi", 0.99, 1);
-		Meal m5 = new Meal(5L, "Croissant", "Un croissant au beurre...", 0.59, 4);
+		Meal m2 = new Meal(2L, 1);
+		Meal m5 = new Meal(5L, 4);
 
 		createOrderAndValidate(clientId, meal, restaurant, shippingAddress, billingAddress);
 		createOrderAndValidate(clientId, m2, r5, shippingAddress, billingAddress);
@@ -151,7 +149,7 @@ public class OrderControllerTest {
 		String updateStatus = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.update.href").toString();
 
 		 mockMvc.perform(patch(updateStatus)
-				.content("{ \"status\": \"ACCEPTED\" }").contentType(MediaType.APPLICATION_JSON))
+				.content("{ \"status\": \"ACCEPTED\", \"payment_method\": \"cb\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				 .andExpect(jsonPath("$.status").value("ACCEPTED"));
@@ -166,13 +164,13 @@ public class OrderControllerTest {
 		String updateStatus = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.update.href").toString();
 
 		mockMvc.perform(patch(updateStatus)
-				.content("{ \"status\": \"ACCEPTED\" }").contentType(MediaType.APPLICATION_JSON))
+				.content("{ \"status\": \"ACCEPTED\", \"payment_method\": \"cb\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.status").value("ACCEPTED"));
 
 		mockMvc.perform(patch(updateStatus)
-				.content("{ \"status\": \"ACCEPTED\" }").contentType(MediaType.APPLICATION_JSON))
+				.content("{ \"status\": \"ACCEPTED\", \"payment_method\": \"cb\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isMethodNotAllowed());
 	}
@@ -221,7 +219,7 @@ public class OrderControllerTest {
 		String updateStatus = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.update.href").toString();
 
 		mockMvc.perform(patch(updateStatus)
-				.content("{ \"status\": \"ACCEPTED\" }").contentType(MediaType.APPLICATION_JSON))
+				.content("{ \"status\": \"ACCEPTED\", \"payment_method\": \"cb\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk());
 
@@ -248,7 +246,7 @@ public class OrderControllerTest {
 		String updateStatus = JsonPath.parse(result.getResponse().getContentAsString()).read("$._links.update.href").toString();
 
 		mockMvc.perform(patch(updateStatus)
-				.content("{ \"status\": \"ACCEPTED\" }").contentType(MediaType.APPLICATION_JSON))
+				.content("{ \"status\": \"ACCEPTED\", \"payment_method\": \"cb\" }").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk());
 
@@ -270,20 +268,24 @@ public class OrderControllerTest {
 				.andExpect(status().isMethodNotAllowed());
 	}
 
-	private MvcResult createOrderAndValidate(String clientId, Meal meal, Restaurant restaurant, Address shipping, Address billing) throws Exception {
+	private MvcResult createOrderAndValidate(String clientId, Meal meal, Restaurant restaurant, ShippingAddress shipping, BillingAddress billing) throws Exception {
 
 		String request =
-				"{\"client\": \"" + clientId + "\"" +
+				"{\"clientId\": \"" + clientId + "\"" +
 				", \"meal\": {" +
 					"\"id\": \"" + meal.getId() + "\"" +
-					", \"name\": \"" + meal.getName() + "\"" +
-					", \"description\": \"" + meal.getDescription() + "\"" +
-					", \"price\": \"" + meal.getPrice() + "\"" +
 					", \"quantity\": \"" + meal.getQuantity() + "\"" +
 				"}" +
 				", \"restaurant\": {" +
 					"\"id\": \"" + restaurant.getId() + "\"" +
 					", \"name\": \"" + restaurant.getName() + "\"" +
+					", \"address\": {" +
+						"\"address_1\": \"" + restaurant.getAddress().getAddress_1() + "\"" +
+						// ", \"address_2\": \"" + restaurant.getAddress().getAddress_2() + "\"" +
+						", \"city\": \"" + restaurant.getAddress().getCity() + "\"" +
+						", \"postcode\": \"" + restaurant.getAddress().getPostcode() + "\"" +
+						", \"country\": \"" + restaurant.getAddress().getCountry() + "\"" +
+					"}" +
 				"}" +
 				", \"shippingAddress\": {" +
 					"\"firstName\": \"" + shipping.getFirstName() + "\"" +
@@ -291,7 +293,6 @@ public class OrderControllerTest {
 					", \"address_1\": \"" + shipping.getAddress_1() + "\"" +
 					", \"address_2\": \"" + shipping.getAddress_2() + "\"" +
 					", \"city\": \"" + shipping.getCity() + "\"" +
-					", \"state\": \"" + shipping.getState() + "\"" +
 					", \"postcode\": \"" + shipping.getPostcode() + "\"" +
 					", \"country\": \"" + shipping.getCountry() + "\"" +
 					", \"email\": \"" + shipping.getEmail() + "\"" +
@@ -303,11 +304,8 @@ public class OrderControllerTest {
 					", \"address_1\": \"" + billing.getAddress_1() + "\"" +
 					", \"address_2\": \"" + billing.getAddress_2() + "\"" +
 					", \"city\": \"" + billing.getCity() + "\"" +
-					", \"state\": \"" + billing.getState() + "\"" +
 					", \"postcode\": \"" + billing.getPostcode() + "\"" +
 					", \"country\": \"" + billing.getCountry() + "\"" +
-					", \"email\": \"" + billing.getEmail() + "\"" +
-					", \"phone\": \"" + shipping.getPhone() + "\"" +
 				"}}" ;
 		return mockMvc.perform(post("/orders")
 				.content(request).contentType(MediaType.APPLICATION_JSON_UTF8))
