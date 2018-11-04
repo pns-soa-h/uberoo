@@ -16,10 +16,11 @@
     </parent>
 
     <modules>
-	    <module>uberoo-deliveries</module>
-	    <module>uberoo-meals</module>
-        <module>uberoo-orders</module>
-        <module>uberoo-payments</module>
+	<module>uberoo-deliveries</module>
+	<module>uberoo-meals</module>
+	<module>uberoo-orders</module>
+	<module>uberoo-payments</module>
+	<module>uberoo-gateway</module>
     </modules>
 
     <properties>
