@@ -46,7 +46,7 @@ public class MealController {
 	@GetMapping("/meals/{id}")
 	public Resource<Meal> getMeal(@PathVariable Long id) {
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<Resource<Meal>> responseEntity = restTemplate.exchange("http://uberoo-meals:8383/meals/" + id,
+		ResponseEntity<Resource<Meal>> responseEntity = restTemplate.exchange("http://uberoo-meals:8080/meals/" + id,
 				HttpMethod.GET,
 				null,
 				new ParameterizedTypeReference<Resource<Meal>>() {},
