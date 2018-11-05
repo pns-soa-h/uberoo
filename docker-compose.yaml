@@ -1,6 +1,14 @@
 version: "3.6"
 
 services:
+  uberoo-gateway:
+    build:
+      context: uberoo-gateway
+      dockerfile: docker/Dockerfile
+    image: soa-uberoo-gateway
+    container_name: uberoo-gateway
+    ports:
+    - "127.0.0.1:8080:8080"
   uberoo-meals:
     build:
       context: uberoo-meals
@@ -8,7 +16,7 @@ services:
     image: soa-uberoo-meals
     container_name: uberoo-meals
     ports:
-    - "127.0.0.1:8080:8080"
+    - "8383:8080"
     links:
     - kafka
     environment:

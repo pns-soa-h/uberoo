@@ -1,4 +1,4 @@
-package fr.unice.polytech.soa.h.uberoo;
+package fr.unice.polytech.soa.uberoo;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

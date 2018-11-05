@@ -1,4 +1,4 @@
-package fr.unice.polytech.soa.h.uberoo;
+package fr.unice.polytech.soa.uberoo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
