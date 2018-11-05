@@ -15,47 +15,14 @@ public class Meal {
 
 	@Column(name = "meal_id")
 	private Long id;
-	@Column(name = "meal_name")
-	private String name;
-	@Column(name = "meal_description")
-	private String description;
-	@Column(name = "meal_price")
-	private Double price;
 	@Column(name = "meal_quantity")
 	private Integer quantity;
 
 	public Meal() {}
 
-	public Meal(Long id, String name, String description, Double price, Integer quantity) {
+	public Meal(Long id, Integer quantity) {
 		this.id = id;
-		this.name = name;
-		this.description = description;
-		this.price = price;
 		this.quantity = quantity;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public Double getPrice() {
-		return price;
-	}
-
-	public void setPrice(Double price) {
-		this.price = price;
 	}
 
 	public Integer getQuantity() {
@@ -78,9 +45,6 @@ public class Meal {
 	public String toString() {
 		return "Meal {" +
 				"meal_id=" + id +
-				", meal_name='" + name + '\'' +
-				", meal_description='" + description + '\'' +
-				", meal_price=" + price +
 				", meal_quantity=" + quantity +
 				'}';
 	}
