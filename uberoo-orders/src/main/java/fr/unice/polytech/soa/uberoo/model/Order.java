@@ -6,11 +6,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 /**
  * Order
@@ -101,16 +100,15 @@ public class Order implements Serializable {
 	@AttributeOverrides({
 			@AttributeOverride(name="firstName", column=@Column(name="billing_firstName")),
 			@AttributeOverride(name="lastName", column=@Column(name="billing_lastName")),
+			@AttributeOverride(name="company", column=@Column(name="billing_company")),
 			@AttributeOverride(name="address_1", column=@Column(name="billing_address_1")),
 			@AttributeOverride(name="address_2", column=@Column(name="billing_address_2")),
 			@AttributeOverride(name="city", column=@Column(name="billing_city")),
 			@AttributeOverride(name="state", column=@Column(name="billing_state")),
 			@AttributeOverride(name="postcode", column=@Column(name="billing_postcode")),
-			@AttributeOverride(name="country", column=@Column(name="billing_country")),
-			@AttributeOverride(name="email", column=@Column(name="billing_email")),
-			@AttributeOverride(name="phone", column=@Column(name="billing_phone"))
+			@AttributeOverride(name="country", column=@Column(name="billing_country"))
 	})
-	@Embedded private Address billingAddress;
+	@Embedded private BillingAddress billingAddress;
 
 	/**
 	 * `shippingAddress` which can be different from 
@@ -119,6 +117,7 @@ public class Order implements Serializable {
 	@AttributeOverrides({
 			@AttributeOverride(name="firstName", column=@Column(name="shipping_firstName")),
 			@AttributeOverride(name="lastName", column=@Column(name="shipping_lastName")),
+			@AttributeOverride(name="company", column=@Column(name="shipping_company")),
 			@AttributeOverride(name="address_1", column=@Column(name="shipping_address_1")),
 			@AttributeOverride(name="address_2", column=@Column(name="shipping_address_2")),
 			@AttributeOverride(name="city", column=@Column(name="shipping_city")),
@@ -128,7 +127,7 @@ public class Order implements Serializable {
 			@AttributeOverride(name="email", column=@Column(name="shipping_email")),
 			@AttributeOverride(name="phone", column=@Column(name="shipping_phone"))
 	})
-	@Embedded private Address shippingAddress;
+	@Embedded private ShippingAddress shippingAddress;
 	
 	@Embedded
 	private PaymentDetails paymentDetails;
@@ -147,25 +146,23 @@ public class Order implements Serializable {
 	private Date completedAt;
 	/* /TIMESTAMPS */
 
-	public Order() {}
-
-	public Order(OrderRequest request) {
-		this(request.getBillingAddress(), request.getShippingAddress(), request.getClient(), request.getMeal(), request.getRestaurant());
+	public Order() {
+		this.paymentDetails  = new PaymentDetails();
+		this.createdAt = new java.sql.Date(Calendar.getInstance().getTime().getTime());
+		this.updatedAt = createdAt;
+		this.status = Status.IN_PROGRESS;
 	}
 
-	public Order(Address billingAddress, Address shippingAddress, Long clientId, Meal meal, Restaurant restaurant) {
+	/*public Order(OrderRequest request) {
+		this(request.getBillingAddress(), request.getShippingAddress(), request.getClient(), request.getMeal(), request.getRestaurant());
+	}*/
+
+	public Order(BillingAddress billingAddress, ShippingAddress shippingAddress, Long clientId, Meal meal, Restaurant restaurant) {
 		this.billingAddress  = billingAddress;
 		this.shippingAddress = shippingAddress;
 		this.clientId 		 = clientId;
 		this.meal 			 = meal;
 		this.restaurant		 = restaurant;
-		this.paymentDetails  = new PaymentDetails();
-		this.status = Status.IN_PROGRESS;
-		this.totalShipping = 0.;
-		// this.total = meals.stream().mapToDouble(Meal::getPrice).sum();
-		this.total = meal.getPrice() * meal.getQuantity();
-		this.createdAt = new java.sql.Date(Calendar.getInstance().getTime().getTime());
-		this.updatedAt = createdAt;
 	}
 
 	public Long getId() {
@@ -200,19 +197,19 @@ public class Order implements Serializable {
 		this.completedAt = completedAt;
 	}
 
-	public Address getBillingAddress() {
+	public BillingAddress getBillingAddress() {
 		return billingAddress;
 	}
 
-	public void setBillingAddress(Address billingAddress) {
+	public void setBillingAddress(BillingAddress billingAddress) {
 		this.billingAddress = billingAddress;
 	}
 
-	public Address getShippingAddress() {
+	public ShippingAddress getShippingAddress() {
 		return shippingAddress;
 	}
 
-	public void setShippingAddress(Address shippingAddress) {
+	public void setShippingAddress(ShippingAddress shippingAddress) {
 		this.shippingAddress = shippingAddress;
 	}
 
