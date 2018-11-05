@@ -1,7 +1,6 @@
 package fr.unice.polytech.soa.uberoo.assembler;
 
 import fr.unice.polytech.soa.uberoo.controller.GeolocationController;
-import fr.unice.polytech.soa.uberoo.model.Coursier;
 import fr.unice.polytech.soa.uberoo.model.Location;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;

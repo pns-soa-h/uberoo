@@ -2,18 +2,22 @@ package fr.unice.polytech.soa.uberoo.controller;
 
 import fr.unice.polytech.soa.uberoo.assembler.CoursierResourceAssembler;
 import fr.unice.polytech.soa.uberoo.assembler.LocationResourceAssembler;
+import fr.unice.polytech.soa.uberoo.exception.BodyMemberNotFoundException;
 import fr.unice.polytech.soa.uberoo.exception.CoursierNotFoundException;
+import fr.unice.polytech.soa.uberoo.exception.MalformedException;
 import fr.unice.polytech.soa.uberoo.model.Coursier;
 import fr.unice.polytech.soa.uberoo.model.Location;
 import fr.unice.polytech.soa.uberoo.repository.CoursierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -44,11 +48,51 @@ public class GeolocationController {
 				linkTo(methodOn(GeolocationController.class).all()).withRel("coursiers"));
 	}
 
+
+	@PostMapping(value = "/coursiers", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<Resource<Coursier>> newCoursier(@RequestBody Coursier coursier) {
+
+		System.out.println(coursier);
+
+		return ResponseEntity
+				.created(linkTo(methodOn(GeolocationController.class).one(coursier.getId())).toUri())
+				.body(assembler.toResource(coursier));
+	}
+
 	@GetMapping("/coursiers/{id}")
 	public Resource <Coursier> one(@PathVariable Long id) {
 		return assembler.toResource(
 				repository.findById(id)
 						.orElseThrow(() -> new CoursierNotFoundException(id)));
+	}
+
+	@PatchMapping(value = "/coursiers/{id}/location")
+	public ResponseEntity<ResourceSupport> updateLocation(@PathVariable Long id, @RequestBody Map<String, String> map) {
+		String strLocation = map.get("location");
+		if(strLocation == null) {
+			throw new BodyMemberNotFoundException("location");
+		}
+
+		Coursier coursier = repository.findById(id).orElseThrow(() -> new CoursierNotFoundException(id));
+		Location location = new Location(strLocation);
+
+			// Retrieve coursierId from body and check if present
+			String coursierId = map.get("coursierId");
+			if (coursierId == null) {
+				throw new BodyMemberNotFoundException("coursierId");
+			}
+
+			// Check if header is well formed
+			try {
+				coursier.setId(Long.parseLong(coursierId));
+			} catch (NumberFormatException ex) {
+				throw new MalformedException("coursierId", "number");
+			}
+
+		coursier.setLocation(location);
+
+		return ResponseEntity.ok(assembler.toResource(repository.save(coursier)));
+
 	}
 
 	@GetMapping("/coursiers/{id}/location")
