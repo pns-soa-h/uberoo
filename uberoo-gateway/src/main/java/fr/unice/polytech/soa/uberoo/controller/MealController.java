@@ -40,34 +40,28 @@ public class MealController {
 
 	private final MealResourceAssembler mealResourceAssembler;
 	private final RestTemplate restTemplate;
+	private final Traverson traverson;
 
 	@Autowired
-	public MealController(MealResourceAssembler mealResourceAssembler) {
+	public MealController(MealResourceAssembler mealResourceAssembler) throws URISyntaxException {
 		this.mealResourceAssembler = mealResourceAssembler;
 		this.restTemplate = new RestTemplate();
+		this.traverson = new Traverson(new URI("http://uberoo-meals:8080/"), MediaTypes.HAL_JSON);
 	}
 
 	@GetMapping("/meals")
 	public Resources<Resource<Meal>> getMeals(@RequestParam(value = "tag", required = false)String tag) {
-		Traverson traverson = null;
-		try {
-			traverson = new Traverson(new URI("http://uberoo-meals:8080/"), MediaTypes.HAL_JSON);
-			Traverson.TraversalBuilder tb = traverson.follow(rel("meals"));
-			ParameterizedTypeReference<Resources<Resource<Meal>>> typeReference = new ParameterizedTypeReference<Resources<Resource<Meal>>>() {};
-			Resources<Resource<Meal>> data = tb.toObject(typeReference);
+		Traverson.TraversalBuilder tb = traverson.follow(rel("meals"));
+		ParameterizedTypeReference<Resources<Resource<Meal>>> typeReference = new ParameterizedTypeReference<Resources<Resource<Meal>>>() {};
+		Resources<Resource<Meal>> data = tb.toObject(typeReference);
 
-			List<Resource<Meal>> req = new LinkedList<>();
-			for (Resource<Meal> r : data) {
-				req.add(mealResourceAssembler.toResource(r.getContent()));
-			}
-
-			return new Resources<>(req,
-					linkTo(methodOn(MealController.class).getMeals(null)).withSelfRel());
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
+		List<Resource<Meal>> req = new LinkedList<>();
+		for (Resource<Meal> r : data) {
+			req.add(mealResourceAssembler.toResource(r.getContent()));
 		}
-		return null;
 
+		return new Resources<>(req,
+				linkTo(methodOn(MealController.class).getMeals(null)).withSelfRel());
 	}
 
 	@GetMapping("/meals/{id}")
