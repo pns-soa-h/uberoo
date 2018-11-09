@@ -7,25 +7,16 @@ import java.util.Objects;
 /**
  * Created by Alexis Couvreur on 9/24/2018.
  */
-@Entity
 public class Meal {
 
-    @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
-    @Column(unique = true)
-    @NotNull
     private String label;
 
-    @OneToOne
-	@NotNull
 	private Restaurant restaurant;
 
-    @OneToOne
     private Tag tag;
 
-    @NotNull
     private String description;
 
     public Meal() {
