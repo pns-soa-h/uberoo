@@ -4,18 +4,15 @@ import fr.unice.polytech.soa.uberoo.assembler.MealResourceAssembler;
 import fr.unice.polytech.soa.uberoo.exception.MealNotFoundException;
 import fr.unice.polytech.soa.uberoo.exception.ServerException;
 import fr.unice.polytech.soa.uberoo.model.Meal;
-import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.client.Traverson;
-import org.springframework.hateoas.mvc.TypeReferences;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +37,7 @@ public class MealController {
 
 	private final MealResourceAssembler mealResourceAssembler;
 	private final RestTemplate restTemplate;
+	// HATEOAS client
 	private final Traverson traverson;
 
 	@Autowired
@@ -51,7 +49,8 @@ public class MealController {
 
 	@GetMapping("/meals")
 	public Resources<Resource<Meal>> getMeals(@RequestParam(value = "tag", required = false)String tag) {
-		Traverson.TraversalBuilder tb = traverson.follow(rel("meals"));
+		Traverson.TraversalBuilder tb = traverson.follow(rel("meals"))
+			.follow(rel("self").withParameter("tag", tag));
 		ParameterizedTypeReference<Resources<Resource<Meal>>> typeReference = new ParameterizedTypeReference<Resources<Resource<Meal>>>() {};
 		Resources<Resource<Meal>> data = tb.toObject(typeReference);
 
