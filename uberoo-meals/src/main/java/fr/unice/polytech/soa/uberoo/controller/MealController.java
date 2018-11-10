@@ -4,6 +4,7 @@ import fr.unice.polytech.soa.uberoo.assembler.MealResourceAssembler;
 import fr.unice.polytech.soa.uberoo.exception.MealNotFoundException;
 import fr.unice.polytech.soa.uberoo.model.Meal;
 import fr.unice.polytech.soa.uberoo.repository.MealRepository;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,7 +47,8 @@ public class MealController {
 				.collect(Collectors.toList());
 
 		return new Resources<>(meals,
-				linkTo(methodOn(MealController.class).getMeals(null)).withSelfRel());
+				linkTo(methodOn(MealController.class).getMeals(null)).withSelfRel(),
+				linkTo(methodOn(MealController.class).getMeal(null)).withRel("item"));
 	}
 
 	@GetMapping("/meals/{id}")

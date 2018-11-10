@@ -36,14 +36,12 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 public class MealController {
 
 	private final MealResourceAssembler mealResourceAssembler;
-	private final RestTemplate restTemplate;
 	// HATEOAS client
 	private final Traverson traverson;
 
 	@Autowired
 	public MealController(MealResourceAssembler mealResourceAssembler) throws URISyntaxException {
 		this.mealResourceAssembler = mealResourceAssembler;
-		this.restTemplate = new RestTemplate();
 		this.traverson = new Traverson(new URI("http://uberoo-meals:8080/"), MediaTypes.HAL_JSON);
 	}
 
@@ -60,23 +58,15 @@ public class MealController {
 		}
 
 		return new Resources<>(req,
-				linkTo(methodOn(MealController.class).getMeals(null)).withSelfRel());
+				linkTo(methodOn(MealController.class).getMeals(null)).withSelfRel(),
+				linkTo(methodOn(MealController.class).getMeal(null)).withRel("item"));
 	}
 
 	@GetMapping("/meals/{id}")
 	public Resource<Meal> getMeal(@PathVariable Long id) {
-		ResponseEntity<Resource<Meal>> responseEntity = restTemplate.exchange("http://uberoo-meals:8080/meals/" + id,
-				HttpMethod.GET,
-				null,
-				new ParameterizedTypeReference<Resource<Meal>>() {},
-				Collections.emptyMap());
-		if (responseEntity.getStatusCode() == HttpStatus.OK) {
-			return correctResource(responseEntity.getBody());
-		} else if (responseEntity.getStatusCode() == HttpStatus.NOT_FOUND) {
-			throw new MealNotFoundException(id);
-		} else {
-			throw new ServerException(responseEntity);
-		}
+		Traverson.TraversalBuilder tb = traverson.follow(rel("meals")).follow(rel("item").withParameter("id", id));
+		ParameterizedTypeReference<Resource<Meal>> typeReference = new ParameterizedTypeReference<Resource<Meal>>() {};
+		return mealResourceAssembler.toResource(tb.toObject(typeReference).getContent());
 	}
 
 	private Resource<Meal> correctResource(Resource<Meal> old) {
