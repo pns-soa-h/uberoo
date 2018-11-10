@@ -12,9 +12,9 @@ class LoadTest extends Simulation {
   val orders_url = "http://localhost:8181"
 
   val consultMeals = scenario("Consult meals")
+    .exec(http("Get meals").get(meals_url + "/meals"))
     .repeat(5) {
       exec(session => session.set("clientId", UUID.randomUUID().getMostSignificantBits().toString))
-        .exec(http("Get meals").get(meals_url + "/meals"))
         .pause(5)
         .exec(http("ETA computation").post(orders_url + "/orders")
           .header("Content-Type", "application/json")
