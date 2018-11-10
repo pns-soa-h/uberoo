@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Date;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Order
@@ -50,8 +51,10 @@ public class Order implements Serializable {
 	/**
 	 * An order is composed of one meal atm
 	 */
-	@Column()
-	private Meal meal;
+	@ElementCollection
+	@Column(name = "meals")
+	@JoinColumn(name = "meal_id")
+	private List<Meal> meals;
 
 	/**
 	 * What the user pay
@@ -68,6 +71,9 @@ public class Order implements Serializable {
 
 	@Column(name="total_shipping")
 	private Double totalShipping;
+
+	@Embedded
+	private Coupon coupon;
 
 	/**
 	 * To be removed
@@ -157,11 +163,11 @@ public class Order implements Serializable {
 		this(request.getBillingAddress(), request.getShippingAddress(), request.getClient(), request.getMeal(), request.getRestaurant());
 	}*/
 
-	public Order(BillingAddress billingAddress, ShippingAddress shippingAddress, Long clientId, Meal meal, Restaurant restaurant) {
+	public Order(BillingAddress billingAddress, ShippingAddress shippingAddress, Long clientId, List<Meal> meals, Restaurant restaurant) {
 		this.billingAddress  = billingAddress;
 		this.shippingAddress = shippingAddress;
 		this.clientId 		 = clientId;
-		this.meal 			 = meal;
+		this.meals 			 = meals;
 		this.restaurant		 = restaurant;
 	}
 
@@ -221,12 +227,12 @@ public class Order implements Serializable {
 		this.clientId = clientId;
 	}
 
-	public Meal getMeal() {
-		return meal;
+	public List<Meal> getMeals() {
+		return meals;
 	}
 
-	public void setMeal(Meal meal) {
-		this.meal = meal;
+	public void setMeals(List<Meal> meals) {
+		this.meals = meals;
 	}
 
 	public Double getTotal() {
@@ -293,6 +299,14 @@ public class Order implements Serializable {
 
 	public void setStatus(Status status) {
 		this.status = status;
+	}
+
+	public Coupon getCoupon() {
+		return coupon;
+	}
+
+	public void setCoupon(Coupon coupon) {
+		this.coupon = coupon;
 	}
 
 	public enum Status {

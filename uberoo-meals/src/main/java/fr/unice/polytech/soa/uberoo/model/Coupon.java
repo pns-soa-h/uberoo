@@ -6,6 +6,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Alexis Couvreur
@@ -157,20 +158,34 @@ public class Coupon {
 		this.code = code;
 	}
 
-	public Double apply(Double amount, Date order) {
+	/**
+	 * Returns how much you can take off
+	 * @param meals
+	 * @param order
+	 * @return
+	 */
+	public Double apply(List<Meal> meals, Date order) {
 
 		if (order.after(date_expires)) {
-			return amount;
+			return 0.;
 		}
 
 		if (freeShipping) {
-			return amount - 1.;
+			return -1.;
 		}
 
-		if (discountType.equals(DiscountType.FIXED_CART)) {
-			return Math.max(0., amount - this.amount);
-		} else if (discountType.equals(DiscountType.PERCENT)) {
-			return amount * (1. - this.amount);
+		switch (discountType) {
+			case MENU_PERCENT:
+				if(meals.stream().anyMatch(m -> m.getCategory().equalsIgnoreCase("entree")) &&
+						meals.stream().anyMatch(m -> m.getCategory().equalsIgnoreCase("plat")) &&
+						meals.stream().anyMatch(m -> m.getCategory().equalsIgnoreCase("dessert"))) {
+					return meals.stream().mapToDouble(Meal::getPrice).sum() * (this.amount/100);
+				}
+				break;
+			case PERCENT:
+				return meals.stream().mapToDouble(Meal::getPrice).sum() * (this.amount/100);
+			case FIXED_CART:
+				return Math.max(0., meals.stream().mapToDouble(Meal::getPrice).sum() - this.amount);
 		}
 
 		return 0.;
@@ -189,6 +204,12 @@ public class Coupon {
 		 * For example 3 meals at 10€ = 30€, a coupon for 10€ off
 		 * gives a discount of 10€
 		 */
-		FIXED_CART
+		FIXED_CART,
+
+		/**
+		 * A percentage discount for a menu
+		 * Entrée - Plat - Dessert
+		 */
+		MENU_PERCENT
 	}
 }

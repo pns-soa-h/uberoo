@@ -48,7 +48,7 @@ public class MealControllerTest {
         Restaurant restaurant = new Restaurant("restaurant");
         tagRepository.save(tag);
         restaurantRepository.save(restaurant);
-		this.meal = new Meal("Ramen", "Japanese dish", 7.99, restaurant, tag);
+		this.meal = new Meal("Ramen", "Japanese dish", 7.99, restaurant, "Plat", tag);
         mealRepository.save(this.meal);
     }
 

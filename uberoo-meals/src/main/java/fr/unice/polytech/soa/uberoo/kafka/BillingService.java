@@ -11,6 +11,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -29,16 +31,15 @@ public class BillingService {
 	@SendTo
 	public Bill onOrderRequestBill(Order order) {
 		Bill bill = new Bill();
+		List<Meal> meals = new ArrayList<>();
 		Double total = 0.;
 
 		// Meal
-		Optional<Meal> meal = mealRepository.findById(order.getMeal().getId());
-		if (meal.isPresent()) {
-			total += meal.get().getPrice() * order.getMeal().getQuantity();
-		} else {
-			// Error meal does not exist
-			return bill;
+		for (Long id : order.getMeals()) {
+			Optional<Meal> meal = mealRepository.findById(id);
+			meal.ifPresent(meals::add);
 		}
+
 		bill.setSubTotal(total);
 
 		total += 1; // Mock for delivery cost 1€
@@ -46,10 +47,7 @@ public class BillingService {
 		// Coupon
 		Optional<Coupon> coupon = couponRepository.findByCode(order.getCoupon().getCode());
 		if (coupon.isPresent()) {
-			// If the coupon is applicable to the restaurant
-			if (coupon.get().getRestaurantId().equals(meal.get().getRestaurant().getId())) {
-				total = coupon.get().apply(total, order.getCreatedAt());
-			}
+			total -= coupon.get().apply(meals, order.getCreatedAt());
 		}
 
 		bill.setTotal(total);

@@ -1,12 +1,13 @@
 package fr.unice.polytech.soa.uberoo.model;
 
 import java.sql.Date;
+import java.util.List;
 
 public class Order {
 
 	private Date createdAt;
 	private Restaurant restaurant;
-	private MealWithQuantity meal;
+	private List<Long> meals;
 	private Coupon coupon;
 
 	public Restaurant getRestaurant() {
@@ -15,14 +16,6 @@ public class Order {
 
 	public void setRestaurant(Restaurant restaurant) {
 		this.restaurant = restaurant;
-	}
-
-	public MealWithQuantity getMeal() {
-		return meal;
-	}
-
-	public void setMeal(MealWithQuantity meal) {
-		this.meal = meal;
 	}
 
 	public Coupon getCoupon() {
@@ -41,19 +34,11 @@ public class Order {
 		this.createdAt = createdAt;
 	}
 
-	public class MealWithQuantity extends Meal {
-		private Integer quantity;
+	public List<Long> getMeals() {
+		return meals;
+	}
 
-		public MealWithQuantity() {
-			super();
-		}
-
-		public Integer getQuantity() {
-			return quantity;
-		}
-
-		public void setQuantity(Integer quantity) {
-			this.quantity = quantity;
-		}
+	public void setMeals(List<Long> meals) {
+		this.meals = meals;
 	}
 }

@@ -14,6 +14,7 @@ public class KafkaConsumer {
 
 	private final OrderRepository repository;
 
+	// ReplyingKafkaTemplate
 	@Autowired
 	public KafkaConsumer(OrderRepository repository) {
 		this.repository = repository;

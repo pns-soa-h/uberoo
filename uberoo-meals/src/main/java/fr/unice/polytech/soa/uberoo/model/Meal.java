@@ -28,6 +28,9 @@ public class Meal {
     @NotNull
     private String description;
 
+    @NotNull
+    private String category;
+
 	@NotNull
 	private Double price;
 
@@ -35,12 +38,13 @@ public class Meal {
 
     }
 
-	public Meal(String label, String description, Double price, Restaurant restaurant, Tag tag) {
+	public Meal(String label, String description, Double price, Restaurant restaurant, String category, Tag tag) {
     	this.label = label;
     	this.description = description;
     	this.restaurant = restaurant;
 		this.price = price;
     	this.tag = tag;
+    	this.category = category;
     }
 
     public Long getId() {
@@ -105,5 +109,13 @@ public class Meal {
 	@Override
 	public int hashCode() {
 		return Objects.hash(label, restaurant, tag, description);
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
 }
