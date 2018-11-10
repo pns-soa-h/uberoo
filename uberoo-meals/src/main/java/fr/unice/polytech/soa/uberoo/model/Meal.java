@@ -1,5 +1,7 @@
 package fr.unice.polytech.soa.uberoo.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
@@ -12,6 +14,7 @@ public class Meal {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
+    @JsonProperty("mealId")
     private Long id;
 
     @Column(unique = true)

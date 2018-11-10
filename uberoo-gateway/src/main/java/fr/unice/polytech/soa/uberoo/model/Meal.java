@@ -1,7 +1,5 @@
 package fr.unice.polytech.soa.uberoo.model;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**
@@ -9,7 +7,7 @@ import java.util.Objects;
  */
 public class Meal {
 
-    private Long id;
+    private long mealId;
 
     private String label;
 
@@ -23,23 +21,24 @@ public class Meal {
 
     }
 
-    public Meal(String label, String description, Restaurant restaurant) {
+    public Meal(long mealId, String label, String description, Restaurant restaurant) {
+    	this.mealId = mealId;
     	this.label = label;
     	this.description = description;
     	this.restaurant = restaurant;
     }
 
-    public Meal(String label, String description, Restaurant restaurant, Tag tag) {
-    	this(label, description, restaurant);
+    public Meal(long mealId, String label, String description, Restaurant restaurant, Tag tag) {
+    	this(mealId, label, description, restaurant);
     	this.tag = tag;
     }
 
-    public Long getId() {
-        return id;
+    public long getMealId() {
+        return mealId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setMealId(Long mealId) {
+        this.mealId = mealId;
     }
 
     public String getLabel() {
