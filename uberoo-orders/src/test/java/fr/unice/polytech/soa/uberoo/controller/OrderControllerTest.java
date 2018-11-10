@@ -5,12 +5,16 @@ import fr.unice.polytech.soa.uberoo.model.*;
 import fr.unice.polytech.soa.uberoo.repository.OrderRepository;
 import org.hamcrest.core.IsNull;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -38,32 +42,31 @@ public class OrderControllerTest {
 	@Autowired
 	private OrderRepository repository;
 
-	/*@ClassRule
+	@ClassRule
 	public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1);
-*/
+
 	private ShippingAddress shippingAddress;
 	private BillingAddress billingAddress;
 	private String clientId;
 	private Restaurant restaurant;
 	private List<Meal> meals;
-/*
+
 	@Autowired
 	private KafkaProperties properties;
 
-	@BeforeClass
-	public static void setup() {
-		//System.setProperty("spring.kafka.bootstrap-servers", embeddedKafka.getBrokersAsString());
-	}
-	*/
-
 	public OrderControllerTest() {
 		clientId = "15"; // arbitrary
-		shippingAddress = new ShippingAddress("Alexis", "Couvreur", null, "2255 Route des Dolines", null, "Valbonne", "06560", "France", "alexis.couvreur@etu.unice.fr", "0612345678");
-		billingAddress = shippingAddress; // My billing address is the same
+		shippingAddress = new ShippingAddress("Alexis", "Couvreur", "alexis.couvreur@etu.unice.fr", "0612345678", "2255 Route des Dolines", null, "Valbonne", "06560", "France");
+		billingAddress = new BillingAddress("Alexis", "Couvreur", "", "2255 Route des Dolines", null, "Valbonne", "06560", "France"); // My billing address is the same
 		restaurant = new Restaurant(12L, "Le Bon Burger", new Address("1 Place Joseph Bermond", null, "Valbonne", "06560", "France"));
-		Meal meal = new Meal(42L, 2);
+		Meal meal = new Meal(42L);
 		meals = new ArrayList<>();
 		meals.add(meal);
+	}
+
+	@BeforeClass
+	public static void setup() {
+		System.setProperty("spring.kafka.bootstrap-servers", embeddedKafka.getBrokersAsString());
 	}
 
 	@Before
@@ -98,20 +101,20 @@ public class OrderControllerTest {
 		createOrderAndValidate(clientId, meals, restaurant, shippingAddress, billingAddress);
 	}
 
-
 	@Test
 	public void shouldRetrieveAllOrders() throws Exception {
 
 		Restaurant r5 = new Restaurant(5L, "Le poisson gourmand", new Address("1 Place Joseph Bermond", null, "Valbonne", "06560", "France"));
 		Restaurant r7 = new Restaurant(7L, "L'assiette creuse", new Address("1 Place Joseph Bermond", null, "Valbonne", "06560", "France"));
 
-		Meal m2 = new Meal(2L, 1);
-		Meal m5 = new Meal(5L, 4);
+		Meal m2 = new Meal(2L);
+		Meal m5 = new Meal(5L);
 
 		List<Meal> meals2 = new ArrayList<>();
 		meals2.add(m2);
 		List<Meal> meals5 = new ArrayList<>();
-		meals2.add(m5);
+		meals5.add(m5);
+		meals5.add(m2);
 		createOrderAndValidate(clientId, meals, restaurant, shippingAddress, billingAddress);
 		createOrderAndValidate(clientId, meals2, r5, shippingAddress, billingAddress);
 		createOrderAndValidate(clientId, meals5, r7, shippingAddress, billingAddress);
@@ -287,7 +290,7 @@ public class OrderControllerTest {
 		StringBuilder mealsString = new StringBuilder();
 
 		meals.forEach(m -> mealsString.append("{\"id\": \"").append(m.getId()).append("\"},"));
-		mealsString.deleteCharAt(mealsString.length());
+		if (meals.size() > 0) mealsString.deleteCharAt(mealsString.length() - 1);
 
 		String request =
 				"{\"clientId\": \"" + clientId + "\"" +
