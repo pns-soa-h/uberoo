@@ -9,11 +9,13 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.*;
 import org.springframework.hateoas.client.Traverson;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +35,8 @@ public class OrderController {
     public OrderController(OrderResourceAssembler assembler) throws URISyntaxException {
         this.assembler = assembler;
         this.traverson = new Traverson(new URI("http://uberoo-orders:8080"), MediaTypes.HAL_JSON);
-        this.restTemplate = new RestTemplate();
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        this.restTemplate = new RestTemplate(requestFactory);
     }
 
 	@GetMapping("/orders")
@@ -85,15 +88,19 @@ public class OrderController {
 			throw new BodyMemberNotFoundException("status");
 		}
 
-		Order.Status status = Order.Status.valueOf(strStatus);
-
 		Traverson.TraversalBuilder tb = traverson.follow(rel("orders"))
-				.follow(rel("item").withParameter("id", id));
+				.follow(rel("item").withParameter("id", id))
+				.follow(rel("update"));
 		ParameterizedTypeReference<ResourceSupport> typeReference = new ParameterizedTypeReference<ResourceSupport>() {};
 
 		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-		HttpEntity<Order.Status> httpEntity = new HttpEntity<>(status, httpHeaders);
+		MediaType mediaType = new MediaType("application", "merge-patch+json");
+		httpHeaders.setContentType(mediaType);
+
+
+		Map<String, String> body = new HashMap<>();
+		body.put("status", strStatus);
+		HttpEntity<Map<String, String>> httpEntity = new HttpEntity<>(body, httpHeaders);
 
 		return restTemplate.exchange(tb.asLink().getHref(), HttpMethod.PATCH, httpEntity, typeReference);
 	}
