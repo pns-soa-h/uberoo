@@ -22,30 +22,10 @@ public class OrderResourceAssembler implements ResourceAssembler<Order, Resource
 	@Override
 	public Resource<Order> toResource(Order order) {
 
-		// Unconditional links to single-item resource and aggregate root
-		Resource<Order> orderResource = new Resource<>(order,
+		return new Resource<>(order,
 				linkTo(methodOn(OrderController.class).one(order.getId())).withSelfRel().expand(),
-				linkTo(methodOn(OrderController.class).all(null, null)).withRel("orders").expand()
+				linkTo(methodOn(OrderController.class).all(null, null)).withRel("orders").expand(),
+				linkTo(methodOn(OrderController.class).updateStatus(order.getId(), null)).withRel("update")
 		);
-
-		// Conditional links based on state of the order
-
-		if (order.getStatus() == Order.Status.IN_PROGRESS) {
-
-			orderResource.add(
-					linkTo(methodOn(OrderController.class)
-							.cancel(order.getId())).withRel("cancel"));
-			orderResource.add(
-					linkTo(methodOn(OrderController.class)
-							.complete(order.getId())).withRel("complete"));
-		}
-
-		if (order.getStatus() == Order.Status.COMPLETED) {
-			orderResource.add(
-					linkTo(methodOn(OrderController.class)
-							.assign(order.getId(), new HashMap<>())).withRel("assign"));
-		}
-
-		return orderResource;
 	}
 }

@@ -1,0 +1,14 @@
+version: "3.6"
+
+services:
+  bertha:
+    image: denvazh/gatling
+    container_name: bertha
+    network_mode: "host"
+    command: "-s LoadTest"
+    ports:
+      - "127.0.0.1:8989:8080"
+    volumes:
+      - ./gatling/conf:/opt/gatling/conf
+      - ./gatling/results:/opt/gatling/results
+      - ./gatling/user-files:/opt/gatling/user-files
