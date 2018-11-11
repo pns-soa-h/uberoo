@@ -4,15 +4,21 @@ import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 
 @Embeddable
-public class ShippingAddress extends BillingAddress {
+public class ShippingAddress extends Address {
 
 	@NotNull private String email;
 	@NotNull private String phone;
+	@NotNull
+	private String firstName;
+	@NotNull
+	private String lastName;
 
 	public ShippingAddress() {}
 
-	public ShippingAddress(@NotNull String firstName, @NotNull String lastName, String company, @NotNull String address_1, String address_2, @NotNull String city, @NotNull String postcode, @NotNull String country, @NotNull String email, @NotNull String phone) {
-		super(firstName, lastName, company, address_1, address_2, city, postcode, country);
+	public ShippingAddress(@NotNull String firstName, @NotNull String lastName, String email, String phone, @NotNull String address_1, String address_2, @NotNull String city, @NotNull String postcode, @NotNull String country) {
+		super(address_1, address_2, city, postcode, country);
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.email = email;
 		this.phone = phone;
 	}
@@ -28,5 +34,21 @@ public class ShippingAddress extends BillingAddress {
 	}
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 }

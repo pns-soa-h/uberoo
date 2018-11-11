@@ -28,19 +28,23 @@ public class Meal {
     @NotNull
     private String description;
 
+    @NotNull
+    private String category;
+
+	@NotNull
+	private Double price;
+
     public Meal() {
 
     }
 
-    public Meal(String label, String description, Restaurant restaurant) {
+	public Meal(String label, String description, Double price, Restaurant restaurant, String category, Tag tag) {
     	this.label = label;
     	this.description = description;
     	this.restaurant = restaurant;
-    }
-
-    public Meal(String label, String description, Restaurant restaurant, Tag tag) {
-    	this(label, description, restaurant);
+		this.price = price;
     	this.tag = tag;
+    	this.category = category;
     }
 
     public Long getId() {
@@ -83,6 +87,14 @@ public class Meal {
 		this.restaurant = restaurant;
 	}
 
+	public Double getPrice() {
+		return price;
+	}
+
+	public void setPrice(Double price) {
+		this.price = price;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -97,5 +109,13 @@ public class Meal {
 	@Override
 	public int hashCode() {
 		return Objects.hash(label, restaurant, tag, description);
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
 }

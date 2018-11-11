@@ -1,15 +1,14 @@
 package fr.unice.polytech.soa.uberoo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Date;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Order
@@ -50,8 +49,10 @@ public class Order implements Serializable {
 	/**
 	 * An order is composed of one meal atm
 	 */
-	@Column()
-	private Meal meal;
+	@ElementCollection
+	@Column(name = "meals")
+	@JoinColumn(name = "meal_id")
+	private List<Meal> meals;
 
 	/**
 	 * What the user pay
@@ -69,13 +70,8 @@ public class Order implements Serializable {
 	@Column(name="total_shipping")
 	private Double totalShipping;
 
-	/**
-	 * To be removed
-	 */
-	@Deprecated
-	@Column(name = "coursier")
-	private Long coursierId;
-
+	@Embedded
+	private Coupon coupon;
 
 	@Embedded
 	private Restaurant restaurant;
@@ -157,11 +153,11 @@ public class Order implements Serializable {
 		this(request.getBillingAddress(), request.getShippingAddress(), request.getClient(), request.getMeal(), request.getRestaurant());
 	}*/
 
-	public Order(BillingAddress billingAddress, ShippingAddress shippingAddress, Long clientId, Meal meal, Restaurant restaurant) {
+	public Order(BillingAddress billingAddress, ShippingAddress shippingAddress, Long clientId, List<Meal> meals, Restaurant restaurant) {
 		this.billingAddress  = billingAddress;
 		this.shippingAddress = shippingAddress;
 		this.clientId 		 = clientId;
-		this.meal 			 = meal;
+		this.meals 			 = meals;
 		this.restaurant		 = restaurant;
 	}
 
@@ -221,12 +217,12 @@ public class Order implements Serializable {
 		this.clientId = clientId;
 	}
 
-	public Meal getMeal() {
-		return meal;
+	public List<Meal> getMeals() {
+		return meals;
 	}
 
-	public void setMeal(Meal meal) {
-		this.meal = meal;
+	public void setMeals(List<Meal> meals) {
+		this.meals = meals;
 	}
 
 	public Double getTotal() {
@@ -261,16 +257,6 @@ public class Order implements Serializable {
 		this.paymentDetails = paymentDetails;
 	}
 
-	@Deprecated
-	public Long getCoursierId() {
-		return coursierId;
-	}
-
-	@Deprecated
-	public void setCoursierId(Long coursierId) {
-		this.coursierId = coursierId;
-	}
-
 	public Restaurant getRestaurant() {
 		return restaurant;
 	}
@@ -293,6 +279,14 @@ public class Order implements Serializable {
 
 	public void setStatus(Status status) {
 		this.status = status;
+	}
+
+	public Coupon getCoupon() {
+		return coupon;
+	}
+
+	public void setCoupon(Coupon coupon) {
+		this.coupon = coupon;
 	}
 
 	public enum Status {

@@ -1,15 +1,17 @@
 package fr.unice.polytech.soa.uberoo.controller;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
-
+import com.google.gson.Gson;
 import fr.unice.polytech.soa.uberoo.TimeETA;
 import fr.unice.polytech.soa.uberoo.TimeETAMock;
 import fr.unice.polytech.soa.uberoo.assembler.OrderResourceAssembler;
+import fr.unice.polytech.soa.uberoo.exception.BodyMemberNotFoundException;
 import fr.unice.polytech.soa.uberoo.exception.MalformedException;
 import fr.unice.polytech.soa.uberoo.exception.OrderNotFoundException;
-import fr.unice.polytech.soa.uberoo.exception.BodyMemberNotFoundException;
+import fr.unice.polytech.soa.uberoo.model.Bill;
 import fr.unice.polytech.soa.uberoo.model.Order;
 import fr.unice.polytech.soa.uberoo.repository.OrderRepository;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
@@ -18,32 +20,42 @@ import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
+import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerErrorException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @RestController
 public class OrderController {
 
+	private final Gson gson;
     private final OrderRepository repository;
 	private final OrderResourceAssembler assembler;
 
 	private TimeETA timeETA;
 
-	private KafkaTemplate<String, Order> kafkaTemplate;
-
+	private KafkaTemplate<String, String> kafkaTemplate;
+	private ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate;
 
 	@Autowired
-    public OrderController(OrderRepository repository, OrderResourceAssembler assembler, KafkaTemplate<String, Order> kafkaTemplate) {
+	public OrderController(OrderRepository repository, OrderResourceAssembler assembler, KafkaTemplate<String, String> kafkaTemplate, ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate) {
         this.repository = repository;
         this.assembler = assembler;
         this.kafkaTemplate = kafkaTemplate;
         this.timeETA = new TimeETAMock();
-    }
+        this.replyingKafkaTemplate = replyingKafkaTemplate;
+		this.gson = new Gson();
+	}
 
 	@GetMapping("/orders")
 	public Resources<Resource<Order>> all(
@@ -74,7 +86,30 @@ public class OrderController {
 		order.setEta(timeETA.calculateOrderETA(order, null));
 
 		// Ask for total
-		kafkaTemplate.send("order_need_total", order);
+		// kafkaTemplate.send("order_need_total", order);
+		RequestReplyFuture<String, String, String> replyFuture = replyingKafkaTemplate.sendAndReceive(new ProducerRecord<>("order_bill", gson.toJson(order)));
+		ConsumerRecord<String, String> sendResult = null;
+		try {
+			sendResult = replyFuture.get();
+		} catch (InterruptedException e) {
+			// error
+			throw new ServerErrorException("InterruptedException sending kafka message", e);
+		} catch (ExecutionException e) {
+			// cancelled
+			throw new ServerErrorException("ExecutionException (cancelled) sending kafka message", e);
+		}
+		System.out.println("---------------->" + sendResult.value());
+		Bill bill = gson.fromJson(sendResult.value().substring(1, sendResult.value().length() - 1).replace("\\", ""), Bill.class);
+
+		order.setTotal(bill.getTotal());
+		order.setSubtotal(bill.getSubTotal());
+		order.setTotalShipping(bill.getShippingPrice());
+
+		// Check if the order has a coupon
+		// and if the bill returned has a valid used coupon
+		if(order.getCoupon() != null && bill.getCoupon() != null) {
+			order.getCoupon().setDescription(bill.getCoupon().getDescription());
+		}
 
 		Order newOrder = repository.save(order);
 
@@ -93,7 +128,12 @@ public class OrderController {
 		}
 
 		Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
-		Order.Status status = Order.Status.valueOf(strStatus);
+		Order.Status status;
+		try {
+			status = Order.Status.valueOf(strStatus);
+		} catch (IllegalArgumentException e) {
+			throw new MalformedException(strStatus, Arrays.toString(Order.Status.values()));
+		}
 
 		// If you're cancelling an order that is not cancellable anymore
 		if(status.equals(Order.Status.CANCELLED) && !order.getStatus().equals(Order.Status.IN_PROGRESS)) {
@@ -109,28 +149,6 @@ public class OrderController {
 					.body(new VndErrors.VndError("Method not allowed", "(2) You can't set an order that is " + order.getStatus().toString() + " into " + status.toString()));
 		}
 
-
-		// Special case for delivery, body contains coursier id
-		// /!\ DEPRECATED /!\
-		if (order.getStatus() == Order.Status.IN_PREPARATION) {
-			order.setStatus(Order.Status.IN_TRANSIT);
-
-			// Retrieve coursierId from body and check if present
-			String coursierId = map.get("coursierId");
-			if (coursierId == null) {
-				// else 422
-				throw new BodyMemberNotFoundException("coursierId");
-			}
-
-			// Check if header is well formed
-			try {
-				order.setCoursierId(Long.parseLong(coursierId));
-			} catch (NumberFormatException ex) {
-				// Else 422 ...
-				throw new MalformedException("coursierId", "number");
-			}
-		}
-
 		if(status == Order.Status.ACCEPTED) {
 			String paymentMethod = map.get("payment_method");
 			if(paymentMethod == null) {
@@ -143,12 +161,12 @@ public class OrderController {
 		}
 		switch (status) {
 			case ACCEPTED:
-				kafkaTemplate.send("order_need_total", order);
+				// kafkaTemplate.send("order_bill", order);
 				break;
 		}
 
 		order.setStatus(status);
-		kafkaTemplate.send("order_status_" + status.name().toLowerCase(), order);
+		kafkaTemplate.send("order_status_" + status.name().toLowerCase(), gson.toJson(order));
 		return ResponseEntity.ok(assembler.toResource(repository.save(order)));
 	}
 }

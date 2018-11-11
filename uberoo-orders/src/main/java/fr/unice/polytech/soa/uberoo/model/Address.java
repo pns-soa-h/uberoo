@@ -1,9 +1,11 @@
 package fr.unice.polytech.soa.uberoo.model;
 
 import javax.persistence.Embeddable;
+import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
 
 @Embeddable
+@MappedSuperclass
 public class Address {
 
 	@NotNull
