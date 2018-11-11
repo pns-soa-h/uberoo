@@ -25,13 +25,15 @@ send_patch_request(){
 send_post_request(){
     # echo "Sending POST request to " $1
     # echo "JSON body :" $2
-    curl -s -d $2 -H "Content-Type: application/json" -X POST $1
+    curl -s -d $2 -H "Content-Type: application/json;charset=UTF-8" -X POST $1
 }
 
-meals="http://localhost:8383/meals"
-coupons="http://localhost:8383/coupons"
+meals="http://localhost:8080/meals"
+coupons="http://localhost:8080/coupons"
 orders="http://localhost:8181/orders"
-deliveries="http://localhost:8282/deliveries"
+deliveries="http://localhost:8282/"
+geolocation="http://localhost:8383/coursiers"
+payments="http://localhost:8484/"
 
 echo "Listing meals :"
 send_get_request $meals
@@ -54,7 +56,9 @@ meal_dessert_id=${meal_address_dessert##*/}
 
 # -------------
 echo "Creating a promotional code '10%OFF' on full menu orders for the restaurant id: ${restaurant_id}"
-send_post_request $coupons '{ "code": "10%MENU", "restaurantId": "'${restaurant_id}'" , "amount": "10", "discountType": "MENU_PERCENT", "description": "10% Off !", "date_expires": "2018-12-28"}' > coupons.json
+body='{"code": "10OFF", "restaurantId": "'${restaurant_id}'", "amount": 10, "discountType": "MENU_PERCENT", "description": "A nice offer", "date_expires": "2018-12-28"}'
+echo $url
+send_post_request $coupons $body > coupons.json
 cat coupons.json
 printf "\n\n"
 
@@ -91,14 +95,14 @@ send_patch_request ${deliveries}"/orders/0" '{"id": "1","name": "Jamie"}'
 printf "\n\n"
 
 echo "The order becomes is assigned."
-send_patch_request ${deliveries}"/orders/0" '{status": "ASSIGNED"}'
+send_patch_request ${deliveries}"/orders/0/status" '{"status": "ASSIGNED"}'
 printf "\n\n"
 
 #TODO do something
 echo "We would like to know where the coursier is."
-send_get_request ${geolocation}"/coursiers/0"
+send_get_request ${geolocation}"/1"
 printf "\n\n"
 
 echo "As Jamie, I announce that the order has been delivered."
-send_patch_request ${deliveries}"/orders/0/status" '{status": ""}'
+send_patch_request ${deliveries}"/orders/1/status" '{"status": "COMPLETED"}'
 printf '\n\n'
