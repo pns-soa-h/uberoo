@@ -1,4 +1,4 @@
-INSERT INTO COURSIER (id, name) VALUES
-  (1, 'Jamie'),
-  (2, 'Fred');
+INSERT INTO COURSIER (id, name, account) VALUES
+  (1, 'Jamie', 42),
+  (2, 'Fred', 69);
 

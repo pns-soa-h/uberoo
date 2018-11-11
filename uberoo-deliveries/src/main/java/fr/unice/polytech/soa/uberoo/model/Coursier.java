@@ -12,17 +12,25 @@ import java.util.Objects;
 @Entity
 public class Coursier implements Serializable {
 	@Id
-	@GeneratedValue(strategy= GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
 	private String name;
+
+	@Column(name = "account")
+	private int accountAmount;
 
 	public Coursier() {
 
 	}
 
 	public Coursier(String name) {
+		this(name, 0);
+	}
+
+	public Coursier(String name, int accountAmount) {
 		this.name = name;
+		this.accountAmount = accountAmount;
 	}
 
 	public Long getId() {
@@ -39,6 +47,10 @@ public class Coursier implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void increaseAmount(int amount) {
+		accountAmount += amount;
 	}
 
 	@Override
