@@ -20,11 +20,11 @@ public class KafkaConsumer {
 		this.repository = repository;
 	}
 
-	@KafkaListener(topics = "order_total_computed")
+	/*@KafkaListener(topics = "order_total_computed")
 	public void onTotalComputed(Order order, Acknowledgment acknowledgment) {
 		Order o = repository.findById(order.getId()).orElseThrow(() -> new OrderNotFoundException(order.getId()));
 		acknowledgment.acknowledge();
-	}
+	}*/
 
 	@KafkaListener(topics = "recipe")
 	public void onOrderReceipe(Recipe recipe, Acknowledgment acknowledgment) {

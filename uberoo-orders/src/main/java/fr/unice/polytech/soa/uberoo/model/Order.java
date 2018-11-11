@@ -1,12 +1,10 @@
 package fr.unice.polytech.soa.uberoo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Date;
 import java.util.Calendar;
@@ -74,14 +72,6 @@ public class Order implements Serializable {
 
 	@Embedded
 	private Coupon coupon;
-
-	/**
-	 * To be removed
-	 */
-	@Deprecated
-	@Column(name = "coursier")
-	private Long coursierId;
-
 
 	@Embedded
 	private Restaurant restaurant;
@@ -265,16 +255,6 @@ public class Order implements Serializable {
 
 	public void setPaymentDetails(PaymentDetails paymentDetails) {
 		this.paymentDetails = paymentDetails;
-	}
-
-	@Deprecated
-	public Long getCoursierId() {
-		return coursierId;
-	}
-
-	@Deprecated
-	public void setCoursierId(Long coursierId) {
-		this.coursierId = coursierId;
 	}
 
 	public Restaurant getRestaurant() {
