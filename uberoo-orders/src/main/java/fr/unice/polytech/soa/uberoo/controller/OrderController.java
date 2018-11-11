@@ -57,7 +57,8 @@ public class OrderController {
 				.collect(Collectors.toList());
 
 		return new Resources<>(orders,
-				linkTo(methodOn(OrderController.class).all(status, restaurantId)).withSelfRel());
+				linkTo(methodOn(OrderController.class).all(status, restaurantId)).withSelfRel(),
+				linkTo(methodOn(OrderController.class).one(null)).withRel("item"));
 	}
 
 	@GetMapping("/orders/{id}")

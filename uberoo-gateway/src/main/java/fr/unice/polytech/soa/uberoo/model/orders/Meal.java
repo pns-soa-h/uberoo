@@ -1,6 +1,4 @@
-package fr.unice.polytech.soa.uberoo.model;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package fr.unice.polytech.soa.uberoo.model.orders;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -61,8 +59,8 @@ public class Meal {
 		return mealId;
 	}
 
-	public void setMealId(Long id) {
-		this.mealId = id;
+	public void setMealId(Long mealId) {
+		this.mealId = mealId;
 	}
 
 	@Override

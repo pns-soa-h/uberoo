@@ -2,11 +2,13 @@ package fr.unice.polytech.soa.uberoo.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Embeddable
 public class Restaurant {
 
 	@Column(name = "restaurant_id")
+	@JsonProperty("restaurantId")
 	private Long id;
 
 	@Column(name = "restaurant_name")

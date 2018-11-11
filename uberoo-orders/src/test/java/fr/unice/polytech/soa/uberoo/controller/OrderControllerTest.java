@@ -95,8 +95,13 @@ public class OrderControllerTest {
 		Restaurant r5 = new Restaurant(5L, "Le poisson gourmand", new Address("1 Place Joseph Bermond", null, "Valbonne", "06560", "France"));
 		Restaurant r7 = new Restaurant(7L, "L'assiette creuse", new Address("1 Place Joseph Bermond", null, "Valbonne", "06560", "France"));
 
+<<<<<<< HEAD
 		Meal m2 = new Meal(2L, 1);
 		Meal m5 = new Meal(5L, 4);
+=======
+		Meal m2 = new Meal(2L, "Baguette", "Une baguette quoi", 0.99);
+		Meal m5 = new Meal(5L, "Croissant", "Un croissant au beurre...", 0.59);
+>>>>>>> 0ea984b... Post orders from gateway
 
 		createOrderAndValidate(clientId, meal, restaurant, shippingAddress, billingAddress);
 		createOrderAndValidate(clientId, m2, r5, shippingAddress, billingAddress);
@@ -131,8 +136,8 @@ public class OrderControllerTest {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.clientId").value(clientId))
-				.andExpect(jsonPath("$.meal.id").value(meal.getId()))
-				.andExpect(jsonPath("$.restaurant.id").value(restaurant.getId()))
+				.andExpect(jsonPath("$.meal.mealId").value(meal.getMealId()))
+				.andExpect(jsonPath("$.restaurant.restaurantId").value(restaurant.getId()))
 				.andExpect(jsonPath("$.status").value("IN_PROGRESS"))
 				.andExpect(jsonPath("$.coursierId").value(IsNull.nullValue()))
 				.andExpect(jsonPath("$.eta").value(1200000));
@@ -273,11 +278,18 @@ public class OrderControllerTest {
 		String request =
 				"{\"clientId\": \"" + clientId + "\"" +
 				", \"meal\": {" +
+<<<<<<< HEAD
 					"\"id\": \"" + meal.getId() + "\"" +
 					", \"quantity\": \"" + meal.getQuantity() + "\"" +
+=======
+					"\"mealId\": \"" + meal.getMealId() + "\"" +
+					", \"name\": \"" + meal.getName() + "\"" +
+					", \"description\": \"" + meal.getDescription() + "\"" +
+					", \"price\": \"" + meal.getPrice() + "\"" +
+>>>>>>> 0ea984b... Post orders from gateway
 				"}" +
 				", \"restaurant\": {" +
-					"\"id\": \"" + restaurant.getId() + "\"" +
+					"\"restaurantId\": \"" + restaurant.getId() + "\"" +
 					", \"name\": \"" + restaurant.getName() + "\"" +
 					", \"address\": {" +
 						"\"address_1\": \"" + restaurant.getAddress().getAddress_1() + "\"" +

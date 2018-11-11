@@ -1,4 +1,4 @@
-package fr.unice.polytech.soa.uberoo.model;
+package fr.unice.polytech.soa.uberoo.model.meals;
 
 import javax.persistence.*;
 

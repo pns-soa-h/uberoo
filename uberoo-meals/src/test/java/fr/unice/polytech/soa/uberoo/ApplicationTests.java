@@ -41,6 +41,7 @@ public class ApplicationTests {
 
     @Before
     public void initBeforeTests() {
+    	System.out.println("Hello");
 	    mealRepository.deleteAll();
 	    tagRepository.deleteAll();
     	restaurantRepository.deleteAll();
@@ -48,8 +49,8 @@ public class ApplicationTests {
         Restaurant restaurant = new Restaurant("restaurant");
         tagRepository.save(tag);
         restaurantRepository.save(restaurant);
-        this.meal = new Meal("Ramen", "Japanese dish", restaurant, tag);
-        mealRepository.save(this.meal);
+	    this.meal = new Meal((long)15, "Ramen", "Japanese Dish", tag, restaurant, 10.0);
+        this.meal = mealRepository.save(this.meal);
     }
 
     @Test
@@ -78,7 +79,7 @@ public class ApplicationTests {
     @Test
     public void shouldRetrieveEntity() throws Exception {
         mockMvc.perform(get("/meals/"+this.meal.getId())).andExpect(status().isOk()).andExpect(
-                jsonPath("$.label").value(this.meal.getLabel())).andExpect(
+                jsonPath("$.name").value(this.meal.getName())).andExpect(
                 jsonPath("$.description").value(this.meal.getDescription()));
     }
 

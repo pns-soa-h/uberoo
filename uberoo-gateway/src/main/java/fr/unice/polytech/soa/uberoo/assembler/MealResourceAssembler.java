@@ -1,7 +1,7 @@
 package fr.unice.polytech.soa.uberoo.assembler;
 
-import fr.unice.polytech.soa.uberoo.controller.MealController;
-import fr.unice.polytech.soa.uberoo.model.Meal;
+import fr.unice.polytech.soa.uberoo.controller.meals.MealController;
+import fr.unice.polytech.soa.uberoo.model.meals.Meal;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.stereotype.Component;

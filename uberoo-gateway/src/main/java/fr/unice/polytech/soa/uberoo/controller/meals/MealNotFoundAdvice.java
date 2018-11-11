@@ -1,4 +1,4 @@
-package fr.unice.polytech.soa.uberoo.controller;
+package fr.unice.polytech.soa.uberoo.controller.meals;
 
 import fr.unice.polytech.soa.uberoo.exception.MealNotFoundException;
 import org.springframework.http.HttpStatus;

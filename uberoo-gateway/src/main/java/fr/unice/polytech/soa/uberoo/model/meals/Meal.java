@@ -1,36 +1,33 @@
-package fr.unice.polytech.soa.uberoo.model;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package fr.unice.polytech.soa.uberoo.model.meals;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
 
 /**
  * Meal
  * In an order context a meal has the basic properties : name, description and price
  * but we add the `quantity` because we might want the meal multiple times
  *
- * @author Alexis Couvreur
+ * @author Julien Lemaire
  */
-@Embeddable
 public class Meal {
 
-	@Column(name = "meal_id")
 	private Long mealId;
-	@Column(name = "meal_name")
 	private String name;
-	@Column(name = "meal_description")
 	private String description;
-	@Column(name = "meal_price")
+	private Tag tag;
+	private Restaurant restaurant;
 	private Double price;
 
 	public Meal() {}
 
-	public Meal(Long id, String name, String description, Double price) {
-		this.mealId = id;
+	public Meal(Long mealId, String name, String description, Tag tag, Double price) {
+		this.mealId = mealId;
 		this.name = name;
 		this.description = description;
 		this.price = price;
+		this.tag = tag;
 	}
 
 	public String getName() {
@@ -61,8 +58,16 @@ public class Meal {
 		return mealId;
 	}
 
-	public void setMealId(Long id) {
-		this.mealId = id;
+	public void setMealId(Long mealId) {
+		this.mealId = mealId;
+	}
+
+	public Tag getTag() {
+		return tag;
+	}
+
+	public void setTag(Tag tag) {
+		this.tag = tag;
 	}
 
 	@Override
@@ -71,6 +76,7 @@ public class Meal {
 				"meal_id=" + mealId +
 				", meal_name='" + name + '\'' +
 				", meal_description='" + description + '\'' +
+				", meal_tag=" + tag.getLabel() +
 				", meal_price=" + price +
 				'}';
 	}

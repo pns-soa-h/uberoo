@@ -1,13 +1,6 @@
-package fr.unice.polytech.soa.uberoo.model;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+package fr.unice.polytech.soa.uberoo.model.orders;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Date;
 import java.util.Calendar;
@@ -23,8 +16,6 @@ import java.util.Calendar;
  *
  * @author Alexis Couvreur
  */
-@Entity(name = "OrderMeal")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Order implements Serializable {
 
     private static final long serialVersionUID = -5123948121637007869L;
@@ -32,11 +23,7 @@ public class Order implements Serializable {
 	/**
 	 * A unique identifier
 	 */
-	@Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
-	@JsonProperty("orderId")
-	private Long id;
+	private Long orderId;
 
 	/**
 	 * An order is attached to a client, even if this client entity
@@ -46,7 +33,6 @@ public class Order implements Serializable {
 	 * For shipping and billing addresses see
 	 * `shippingAddress` and `billingAddress` properties
 	 */
-	@Column(name = "client", nullable = false)
 	private Long clientId;
 
 	/**
@@ -65,21 +51,10 @@ public class Order implements Serializable {
 	/**
 	 * Total minus all kind of taxes
 	 */
-	@Column
 	private Double subtotal;
 
-	@Column(name="total_shipping")
 	private Double totalShipping;
 
-	/**
-	 * To be removed
-	 */
-	@Deprecated
-	@Column(name = "coursier")
-	private Long coursierId;
-
-
-	@Embedded
 	private Restaurant restaurant;
 
 	/**
@@ -89,77 +64,39 @@ public class Order implements Serializable {
 	 * 2. Order prepared
 	 * 3. Coursier retrieves and delivers
 	 */
-	@Column(name = "eta")
 	private Long eta;
 
-	@Enumerated(EnumType.STRING)
 	private Status status;
 
 	/**
 	 * `billingAddress` which can be different from 
 	 * the `shippingAddress`
 	 */
-	@AttributeOverrides({
-			@AttributeOverride(name="firstName", column=@Column(name="billing_firstName")),
-			@AttributeOverride(name="lastName", column=@Column(name="billing_lastName")),
-			@AttributeOverride(name="company", column=@Column(name="billing_company")),
-			@AttributeOverride(name="address_1", column=@Column(name="billing_address_1")),
-			@AttributeOverride(name="address_2", column=@Column(name="billing_address_2")),
-			@AttributeOverride(name="city", column=@Column(name="billing_city")),
-			@AttributeOverride(name="state", column=@Column(name="billing_state")),
-			@AttributeOverride(name="postcode", column=@Column(name="billing_postcode")),
-			@AttributeOverride(name="country", column=@Column(name="billing_country"))
-	})
-	@Embedded private BillingAddress billingAddress;
+	private Address billingAddress;
 
 	/**
 	 * `shippingAddress` which can be different from 
 	 * the `billingAddress`
 	 */
-	@AttributeOverrides({
-			@AttributeOverride(name="firstName", column=@Column(name="shipping_firstName")),
-			@AttributeOverride(name="lastName", column=@Column(name="shipping_lastName")),
-			@AttributeOverride(name="company", column=@Column(name="shipping_company")),
-			@AttributeOverride(name="address_1", column=@Column(name="shipping_address_1")),
-			@AttributeOverride(name="address_2", column=@Column(name="shipping_address_2")),
-			@AttributeOverride(name="city", column=@Column(name="shipping_city")),
-			@AttributeOverride(name="state", column=@Column(name="shipping_state")),
-			@AttributeOverride(name="postcode", column=@Column(name="shipping_postcode")),
-			@AttributeOverride(name="country", column=@Column(name="shipping_country")),
-			@AttributeOverride(name="email", column=@Column(name="shipping_email")),
-			@AttributeOverride(name="phone", column=@Column(name="shipping_phone"))
-	})
-	@Embedded private ShippingAddress shippingAddress;
+	private Address shippingAddress;
 	
-	@Embedded
 	private PaymentDetails paymentDetails;
 
 	/* TIMESTAMPS */
-	@Column(name = "created_at")
-	@CreationTimestamp
 	private Date createdAt;
 
-	@Column(name = "updated_at")
-	@UpdateTimestamp
 	private Date updatedAt;
 
-	@Column(name = "completed_at", columnDefinition = "DATE default NULL")
-	@UpdateTimestamp
 	private Date completedAt;
 	/* /TIMESTAMPS */
 
-	public Order() {
-		this.paymentDetails  = new PaymentDetails();
-		this.createdAt = new java.sql.Date(Calendar.getInstance().getTime().getTime());
-		this.updatedAt = createdAt;
-		this.status = Status.IN_PROGRESS;
+	public Order() {}
+
+	public Order(OrderRequest request) {
+		this(request.getBillingAddress(), request.getShippingAddress(), request.getClient(), request.getMeal(), request.getRestaurant());
 	}
 
-	/*public Order(OrderRequest request) {
-		this(request.getBillingAddress(), request.getShippingAddress(), request.getClient(), request.getMeal(), request.getRestaurant());
-	}*/
-
-	public Order(BillingAddress billingAddress, ShippingAddress shippingAddress, Long clientId, Meal meal, Restaurant restaurant) {
+	public Order(Address billingAddress, Address shippingAddress, Long clientId, Meal meal, Restaurant restaurant) {
 		this.billingAddress  = billingAddress;
 		this.shippingAddress = shippingAddress;
 		this.clientId 		 = clientId;
@@ -170,16 +107,16 @@ public class Order implements Serializable {
 		this.totalShipping = 0.;
 		// this.total = meals.stream().mapToDouble(Meal::getPrice).sum();
 		this.total = meal.getPrice();
-		this.createdAt = new java.sql.Date(Calendar.getInstance().getTime().getTime());
+		this.createdAt = new Date(Calendar.getInstance().getTime().getTime());
 		this.updatedAt = createdAt;
 	}
 
-	public Long getId() {
-		return id;
+	public Long getOrderId() {
+		return orderId;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
 	}
 
 	public Date getCreatedAt() {
@@ -206,19 +143,19 @@ public class Order implements Serializable {
 		this.completedAt = completedAt;
 	}
 
-	public BillingAddress getBillingAddress() {
+	public Address getBillingAddress() {
 		return billingAddress;
 	}
 
-	public void setBillingAddress(BillingAddress billingAddress) {
+	public void setBillingAddress(Address billingAddress) {
 		this.billingAddress = billingAddress;
 	}
 
-	public ShippingAddress getShippingAddress() {
+	public Address getShippingAddress() {
 		return shippingAddress;
 	}
 
-	public void setShippingAddress(ShippingAddress shippingAddress) {
+	public void setShippingAddress(Address shippingAddress) {
 		this.shippingAddress = shippingAddress;
 	}
 
@@ -268,16 +205,6 @@ public class Order implements Serializable {
 
 	public void setPaymentDetails(PaymentDetails paymentDetails) {
 		this.paymentDetails = paymentDetails;
-	}
-
-	@Deprecated
-	public Long getCoursierId() {
-		return coursierId;
-	}
-
-	@Deprecated
-	public void setCoursierId(Long coursierId) {
-		this.coursierId = coursierId;
 	}
 
 	public Restaurant getRestaurant() {
