@@ -59,7 +59,6 @@ public class OrderController {
 		Coursier coursierLoaded = coursierRepository.findById(coursier.getId()).orElseThrow(() -> new CoursierNotFoundException(coursier.getId()));
 		order.setCoursier(coursierLoaded);
 		Order res = repository.save(order);
-		System.out.println("TEEEST " + res.getCoursier());
 		return ResponseEntity.ok(assembler.toResource(res));
 	}
 }

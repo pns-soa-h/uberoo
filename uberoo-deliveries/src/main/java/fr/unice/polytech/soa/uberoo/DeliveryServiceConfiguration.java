@@ -2,6 +2,7 @@ package fr.unice.polytech.soa.uberoo;
 
 import fr.unice.polytech.soa.uberoo.model.Coursier;
 import fr.unice.polytech.soa.uberoo.model.Meal;
+import fr.unice.polytech.soa.uberoo.model.Order;
 import fr.unice.polytech.soa.uberoo.model.Restaurant;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -18,5 +19,6 @@ public class DeliveryServiceConfiguration extends RepositoryRestConfigurerAdapte
 	@Override
 	public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
 		config.exposeIdsFor(Coursier.class);
+		config.exposeIdsFor(Order.class);
 	}
 }

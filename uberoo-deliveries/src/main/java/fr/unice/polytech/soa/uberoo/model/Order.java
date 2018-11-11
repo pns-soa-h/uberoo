@@ -1,9 +1,8 @@
 package fr.unice.polytech.soa.uberoo.model;
 
-import org.springframework.data.rest.core.annotation.RestResource;
-
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by Alexis Couvreur on 9/24/2018.
@@ -14,10 +13,15 @@ public class Order implements Serializable {
     @Id
     private Long id;
 
-    @Embedded
-    private Meal meal;
+	@ElementCollection
+	@Column(name = "meals")
+	@JoinColumn(name = "meal_id")
+	private List<Meal> meals;
 
     private Coursier coursier;
+
+	@Column(name = "client", nullable = false)
+	private Long clientId;
 
     @Column(name = "eta")
     private Long eta;
@@ -25,12 +29,12 @@ public class Order implements Serializable {
 	public Order() {
     }
 
-	public Meal getMeal() {
-		return meal;
+	public List<Meal> getMeals() {
+		return meals;
 	}
 
-	public void setMeal(Meal meal) {
-		this.meal = meal;
+	public void setMeals(List<Meal> meals) {
+		this.meals = meals;
 	}
 
 	public Coursier getCoursier() {
@@ -57,11 +61,12 @@ public class Order implements Serializable {
     	this.eta = eta;
 	}
 
-	public enum Status {
-		IN_PROGRESS,
-		COMPLETED,
-		CANCELLED,
-		ASSIGNED
+	public Long getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(Long clientId) {
+		this.clientId = clientId;
 	}
 
 }
