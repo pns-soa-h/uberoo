@@ -66,12 +66,8 @@ public class OrderController {
 		Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
 		Coursier coursierLoaded = coursierRepository.findById(coursier.getId()).orElseThrow(() -> new CoursierNotFoundException(coursier.getId()));
 		order.setCoursier(coursierLoaded);
-<<<<<<< HEAD
-		Order res = repository.save(order);
-=======
 		Order res = orderRepository.save(order);
 		System.out.println("TEEEST " + res.getCoursier());
->>>>>>> 424bc4b... Coursier account
 		return ResponseEntity.ok(assembler.toResource(res));
 	}
 
