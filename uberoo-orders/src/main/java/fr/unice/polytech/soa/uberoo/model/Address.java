@@ -7,11 +7,11 @@ import javax.validation.constraints.NotNull;
 public class Address {
 
 	@NotNull
-	private String address_1;
-	private String address_2;
-	@NotNull private String city;
-	@NotNull private String postcode;
-	@NotNull private String country;
+	protected String address_1;
+	protected String address_2;
+	@NotNull protected String city;
+	@NotNull protected String postcode;
+	@NotNull protected String country;
 
 	public Address() {}
 

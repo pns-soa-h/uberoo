@@ -72,13 +72,13 @@ public class Order implements Serializable {
 	 * `billingAddress` which can be different from 
 	 * the `shippingAddress`
 	 */
-	private Address billingAddress;
+	private BillingAddress billingAddress;
 
 	/**
 	 * `shippingAddress` which can be different from 
 	 * the `billingAddress`
 	 */
-	private Address shippingAddress;
+	private ShippingAddress shippingAddress;
 	
 	private PaymentDetails paymentDetails;
 
@@ -92,11 +92,7 @@ public class Order implements Serializable {
 
 	public Order() {}
 
-	public Order(OrderRequest request) {
-		this(request.getBillingAddress(), request.getShippingAddress(), request.getClient(), request.getMeal(), request.getRestaurant());
-	}
-
-	public Order(Address billingAddress, Address shippingAddress, Long clientId, Meal meal, Restaurant restaurant) {
+	public Order(BillingAddress billingAddress, ShippingAddress shippingAddress, Long clientId, Meal meal, Restaurant restaurant) {
 		this.billingAddress  = billingAddress;
 		this.shippingAddress = shippingAddress;
 		this.clientId 		 = clientId;
@@ -143,19 +139,19 @@ public class Order implements Serializable {
 		this.completedAt = completedAt;
 	}
 
-	public Address getBillingAddress() {
+	public BillingAddress getBillingAddress() {
 		return billingAddress;
 	}
 
-	public void setBillingAddress(Address billingAddress) {
+	public void setBillingAddress(BillingAddress billingAddress) {
 		this.billingAddress = billingAddress;
 	}
 
-	public Address getShippingAddress() {
+	public ShippingAddress getShippingAddress() {
 		return shippingAddress;
 	}
 
-	public void setShippingAddress(Address shippingAddress) {
+	public void setShippingAddress(ShippingAddress shippingAddress) {
 		this.shippingAddress = shippingAddress;
 	}
 

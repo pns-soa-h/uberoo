@@ -49,7 +49,7 @@ public class OrderControllerTest {
 		shippingAddress = new ShippingAddress("Alexis", "Couvreur", null, "2255 Route des Dolines", null, "Valbonne", "06560", "France", "alexis.couvreur@etu.unice.fr", "0612345678");
 		billingAddress = shippingAddress; // My billing address is the same
 		restaurant = new Restaurant(12L, "Le Bon Burger", new Address("1 Place Joseph Bermond", null, "Valbonne", "06560", "France"));
-		meal = new Meal(42L, 2);
+		meal = new Meal(42L, "Hamburger", "Que dire de plus...", 2.0);
 	}
 
 	@ClassRule
@@ -95,13 +95,9 @@ public class OrderControllerTest {
 		Restaurant r5 = new Restaurant(5L, "Le poisson gourmand", new Address("1 Place Joseph Bermond", null, "Valbonne", "06560", "France"));
 		Restaurant r7 = new Restaurant(7L, "L'assiette creuse", new Address("1 Place Joseph Bermond", null, "Valbonne", "06560", "France"));
 
-<<<<<<< HEAD
-		Meal m2 = new Meal(2L, 1);
-		Meal m5 = new Meal(5L, 4);
-=======
+
 		Meal m2 = new Meal(2L, "Baguette", "Une baguette quoi", 0.99);
 		Meal m5 = new Meal(5L, "Croissant", "Un croissant au beurre...", 0.59);
->>>>>>> 0ea984b... Post orders from gateway
 
 		createOrderAndValidate(clientId, meal, restaurant, shippingAddress, billingAddress);
 		createOrderAndValidate(clientId, m2, r5, shippingAddress, billingAddress);
@@ -278,15 +274,10 @@ public class OrderControllerTest {
 		String request =
 				"{\"clientId\": \"" + clientId + "\"" +
 				", \"meal\": {" +
-<<<<<<< HEAD
-					"\"id\": \"" + meal.getId() + "\"" +
-					", \"quantity\": \"" + meal.getQuantity() + "\"" +
-=======
 					"\"mealId\": \"" + meal.getMealId() + "\"" +
 					", \"name\": \"" + meal.getName() + "\"" +
 					", \"description\": \"" + meal.getDescription() + "\"" +
 					", \"price\": \"" + meal.getPrice() + "\"" +
->>>>>>> 0ea984b... Post orders from gateway
 				"}" +
 				", \"restaurant\": {" +
 					"\"restaurantId\": \"" + restaurant.getId() + "\"" +

@@ -3,7 +3,6 @@ package fr.unice.polytech.soa.uberoo.controller.orders;
 import fr.unice.polytech.soa.uberoo.assembler.OrderResourceAssembler;
 import fr.unice.polytech.soa.uberoo.exception.BodyMemberNotFoundException;
 import fr.unice.polytech.soa.uberoo.model.orders.Order;
-import fr.unice.polytech.soa.uberoo.model.orders.OrderRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.*;
@@ -68,14 +67,14 @@ public class OrderController {
 	}
 
 	@PostMapping(value = "/orders", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<Resource<Order>> newOrder(@RequestBody OrderRequest orderRequest) {
+	public ResponseEntity<Resource<Order>> newOrder(@RequestBody Order order) {
 		Traverson.TraversalBuilder tb = traverson.follow(rel("orders"))
 				.follow(rel("self"));
 		ParameterizedTypeReference<Resource<Order>> typeReference = new ParameterizedTypeReference<Resource<Order>>() {};
 
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-		HttpEntity<OrderRequest> httpEntity = new HttpEntity<>(orderRequest, httpHeaders);
+		HttpEntity<Order> httpEntity = new HttpEntity<>(order, httpHeaders);
 		return restTemplate.exchange(tb.asLink().getHref(), HttpMethod.POST, httpEntity, typeReference);
 	}
 
@@ -83,24 +82,15 @@ public class OrderController {
 	@PatchMapping("/orders/{id}/status")
 	public ResponseEntity<ResourceSupport> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> map) {
 
-    	String strStatus = map.get("status");
-    	if(strStatus == null) {
-			throw new BodyMemberNotFoundException("status");
-		}
-
 		Traverson.TraversalBuilder tb = traverson.follow(rel("orders"))
 				.follow(rel("item").withParameter("id", id))
 				.follow(rel("update"));
 		ParameterizedTypeReference<ResourceSupport> typeReference = new ParameterizedTypeReference<ResourceSupport>() {};
 
 		HttpHeaders httpHeaders = new HttpHeaders();
-		MediaType mediaType = new MediaType("application", "merge-patch+json");
-		httpHeaders.setContentType(mediaType);
+		httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
 
-
-		Map<String, String> body = new HashMap<>();
-		body.put("status", strStatus);
-		HttpEntity<Map<String, String>> httpEntity = new HttpEntity<>(body, httpHeaders);
+		HttpEntity<Map<String, String>> httpEntity = new HttpEntity<>(map, httpHeaders);
 
 		return restTemplate.exchange(tb.asLink().getHref(), HttpMethod.PATCH, httpEntity, typeReference);
 	}

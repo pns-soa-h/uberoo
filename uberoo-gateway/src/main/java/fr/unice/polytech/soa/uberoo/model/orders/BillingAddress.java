@@ -1,4 +1,4 @@
-package fr.unice.polytech.soa.uberoo.model;
+package fr.unice.polytech.soa.uberoo.model.orders;
 
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
@@ -6,9 +6,9 @@ import javax.validation.constraints.NotNull;
 @Embeddable
 public class BillingAddress extends Address {
 	@NotNull
-	protected String firstName;
+	private String firstName;
 	@NotNull private String lastName;
-	protected String company;
+	private String company;
 
 	public BillingAddress() {}
 
