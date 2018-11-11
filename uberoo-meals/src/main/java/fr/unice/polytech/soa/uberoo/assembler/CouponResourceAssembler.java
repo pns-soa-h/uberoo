@@ -14,6 +14,7 @@ public class CouponResourceAssembler implements ResourceAssembler<Coupon, Resour
 	@Override
 	public Resource<Coupon> toResource(Coupon entity) {
 		return new Resource<>(entity,
+				linkTo(methodOn(CouponController.class).find(entity.getId())).withSelfRel(),
 				linkTo(methodOn(CouponController.class).findAll(null)).withRel("coupons"));
 	}
 }
