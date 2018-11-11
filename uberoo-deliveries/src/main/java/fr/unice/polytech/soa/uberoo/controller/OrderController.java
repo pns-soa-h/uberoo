@@ -31,10 +31,10 @@ public class OrderController {
 	private final OrderResourceAssembler assembler;
 	private final CoursierRepository coursierRepository;
 
-	private KafkaTemplate <String, Long> kafkaTemplate;
+	private KafkaTemplate <String, String> kafkaTemplate;
 
 	@Autowired
-	public OrderController(OrderRepository orderRepository, OrderResourceAssembler assembler, CoursierRepository coursierRepository, KafkaTemplate <String, Long> kafkaTemplate) {
+	public OrderController(OrderRepository orderRepository, OrderResourceAssembler assembler, CoursierRepository coursierRepository, KafkaTemplate <String, String> kafkaTemplate) {
 		this.orderRepository = orderRepository;
 		this.assembler = assembler;
 		this.coursierRepository = coursierRepository;
@@ -80,7 +80,7 @@ public class OrderController {
 		Coursier coursier = order.getCoursier();
 		coursier.increaseAmount(10);
 		coursierRepository.save(coursier);
-		kafkaTemplate.send("orderDelivered", order.getId());
+		kafkaTemplate.send("orderDelivered", String.valueOf(order.getId()));
 		return ResponseEntity.ok(assembler.toResource(res));
 	}
 

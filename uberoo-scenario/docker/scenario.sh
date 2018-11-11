@@ -62,7 +62,7 @@ cat coupons.json
 printf "\n\n"
 
 echo "Listing coupons :"
-curl $coupons
+send_get_request $coupons
 printf "\n\n"
 
 echo "Sending request to order the an entry-main course-dessert with a coupon :"
@@ -77,22 +77,22 @@ cat order_confirm_response.json
 printf "\n\n"
 
 echo "Display created orders for the restaurant :"
-curl ${orders}"?status=ACCEPTED&restaurant=${restaurant_id}" > created_orders.json
+send_get_request ${orders}"?status=ACCEPTED&restaurant=${restaurant_id}" > created_orders.json
 cat created_orders.json
 printf "\n\n"
 
 echo "Display pending orders :"
-curl ${deliveries}"/orders"
+send_get_request ${deliveries}"/orders"
 printf "\n\n"
 
 echo "Getting the first order :"
 id=$(cat created_orders.json | jq '._embedded.orders[0].id' | tr -d '"')
-curl ${deliveries}"/orders/${id}" > first_order.json
+send_get_request ${deliveries}"/orders/${id}" > first_order.json
 cat first_order.json
 printf "\n\n"
 
 echo "Display existing coursiers :"
-curl ${deliveries}"/coursiers"
+send_get_request ${deliveries}"/coursiers"
 printf "\n\n"
 
 echo "As Jamie, I take the previous order."
