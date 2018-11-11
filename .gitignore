@@ -211,3 +211,6 @@ tags
 
 # End of https://www.gitignore.io/api/vim,java,maven,eclipse,intellij
 
+# Gatling generated files
+uberoo-load/gatling/conf/*
+uberoo-load/gatling/results/*

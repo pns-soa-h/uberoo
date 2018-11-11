@@ -15,22 +15,11 @@ public class Meal {
 
 	@Column(name = "meal_id")
 	private Long id;
-	@Column(name = "meal_quantity")
-	private Integer quantity;
 
 	public Meal() {}
 
-	public Meal(Long id, Integer quantity) {
+	public Meal(Long id) {
 		this.id = id;
-		this.quantity = quantity;
-	}
-
-	public Integer getQuantity() {
-		return quantity;
-	}
-
-	public void setQuantity(Integer quantity) {
-		this.quantity = quantity;
 	}
 
 	public Long getId() {
@@ -45,7 +34,6 @@ public class Meal {
 	public String toString() {
 		return "Meal {" +
 				"meal_id=" + id +
-				", meal_quantity=" + quantity +
 				'}';
 	}
 }

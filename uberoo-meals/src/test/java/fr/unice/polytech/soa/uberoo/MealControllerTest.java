@@ -9,21 +9,21 @@ import fr.unice.polytech.soa.uberoo.repository.TagRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ApplicationTests {
+public class MealControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -48,7 +48,7 @@ public class ApplicationTests {
         Restaurant restaurant = new Restaurant("restaurant");
         tagRepository.save(tag);
         restaurantRepository.save(restaurant);
-        this.meal = new Meal("Ramen", "Japanese dish", restaurant, tag);
+		this.meal = new Meal("Ramen", "Japanese dish", 7.99, restaurant, "Plat", tag);
         mealRepository.save(this.meal);
     }
 
@@ -77,9 +77,10 @@ public class ApplicationTests {
 
     @Test
     public void shouldRetrieveEntity() throws Exception {
-        mockMvc.perform(get("/meals/"+this.meal.getId())).andExpect(status().isOk()).andExpect(
-                jsonPath("$.label").value(this.meal.getLabel())).andExpect(
-                jsonPath("$.description").value(this.meal.getDescription()));
+		mockMvc.perform(get("/meals/" + this.meal.getId())).andExpect(status().isOk())
+				.andExpect(jsonPath("$.label").value(this.meal.getLabel()))
+				.andExpect(jsonPath("$.description").value(this.meal.getDescription()))
+				.andExpect(jsonPath("$.price").value(this.meal.getPrice()));
     }
 
     @Test

@@ -1,18 +1,15 @@
 package fr.unice.polytech.soa.uberoo.model;
 
+import fr.unice.polytech.soa.uberoo.model.Addition.Method;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-
-import fr.unice.polytech.soa.uberoo.model.Addition.Method;
 
 @Entity(name = "RecipeOrder")
 public class Recipe implements Serializable{
 
+	@Id
 	@Column(name = "orderId", nullable = false)
 	private Long orderId;
 	

@@ -1,46 +1,41 @@
 package fr.unice.polytech.soa.uberoo.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by Alexis Couvreur on 9/24/2018.
  */
 @Entity(name = "OrderDelivery")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Order implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
-    private Long id;
+	@Id
+	private Long id;
 
-    @OneToOne
-    private Meal meal;
+	@ElementCollection
+	@Column(name = "meals")
+	@JoinColumn(name = "meal_id")
+	private List <Meal> meals;
 
-	@OneToOne
-    private Coursier coursier;
+	private Coursier coursier;
 
-    @OneToOne
-	private Restaurant restaurant;
-
-    @Column(name = "eta")
-    private Long eta;
-
-	@Enumerated(EnumType.STRING)
+	@Column(name = "client", nullable = false)
+	private Long clientId;
 	private Status status;
 
-	public Order() {
-    }
+	@Column(name = "eta")
+	private Long eta;
 
-	public Meal getMeal() {
-		return meal;
+	public Order() {
 	}
 
-	public void setMeal(Meal meal) {
-		this.meal = meal;
+	public List <Meal> getMeals() {
+		return meals;
+	}
+
+	public void setMeals(List <Meal> meals) {
+		this.meals = meals;
 	}
 
 	public Coursier getCoursier() {
@@ -51,32 +46,32 @@ public class Order implements Serializable {
 		this.coursier = coursier;
 	}
 
-	public Restaurant getRestaurant() {
-		return restaurant;
-	}
-
-	public void setRestaurant(Restaurant restaurant) {
-		this.restaurant = restaurant;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public Long getId() {
-        return id;
-    }
-
-    public Status getStatus() {
-    	return this.status;
-	}
-
-	public void setStatus(Status status) {
-    	this.status = status;
+		return id;
 	}
 
 	public Long getETA() {
-    	return eta;
+		return eta;
 	}
 
 	public void setETA(Long eta) {
-    	this.eta = eta;
+		this.eta = eta;
+	}
+
+	public Long getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(Long clientId) {
+		this.clientId = clientId;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	public enum Status {
