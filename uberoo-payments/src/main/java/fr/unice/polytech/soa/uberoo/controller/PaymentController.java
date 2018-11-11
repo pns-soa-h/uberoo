@@ -17,8 +17,6 @@ import java.util.Date;
 @Component
 public class PaymentController {
 
-
-
 	@Autowired
 	private OrderRepository orderRepository;
 
@@ -26,25 +24,24 @@ public class PaymentController {
 	private RecipeRepository recipeRepository;
 
 	@Autowired
-	private KafkaTemplate<String, Recipe> recipeTemplate;
+	private KafkaTemplate <String, Recipe> recipeTemplate;
 
 	@Autowired
-	private KafkaTemplate<String, String> errorTemplate;
-
+	private KafkaTemplate <String, String> errorTemplate;
 
 
 	@KafkaListener(topics = "payment")
 	public void deliver(Addition payment, Acknowledgment acknowledgment) {
 		Order o = orderRepository.findById(payment.getOrderId()).orElse(null);
-		if(o == null) {
-			errorTemplate.send("paymentError", "Order : "+payment.getOrderId()+" does not exist");
+		if (o == null) {
+			errorTemplate.send("paymentError", "Order : " + payment.getOrderId() + " does not exist");
 			return;
 		}
-		if(recipeRepository.findById(payment.getOrderId()).orElse(null)!=null) {
-			errorTemplate.send("paymentError", "Order : "+payment.getOrderId()+" is already paid");
+		if (recipeRepository.findById(payment.getOrderId()).orElse(null) != null) {
+			errorTemplate.send("paymentError", "Order : " + payment.getOrderId() + " is already paid");
 			return;
 		}
-		Recipe recipe = new Recipe(payment.getOrderId(),payment.getMontant(),new Date(System.currentTimeMillis()),payment.getPaymentMethod());
+		Recipe recipe = new Recipe(payment.getOrderId(), payment.getMontant(), new Date(System.currentTimeMillis()), payment.getPaymentMethod());
 		recipeTemplate.send("recipe", recipe);
 		recipeRepository.save(recipe);
 		acknowledgment.acknowledge();
