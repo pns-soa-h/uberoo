@@ -1,46 +1,40 @@
 package fr.unice.polytech.soa.uberoo.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by Alexis Couvreur on 9/24/2018.
  */
 @Entity(name = "OrderDelivery")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Order implements Serializable {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
     private Long id;
 
-    @OneToOne
-    private Meal meal;
+	@ElementCollection
+	@Column(name = "meals")
+	@JoinColumn(name = "meal_id")
+	private List<Meal> meals;
 
-	@OneToOne
     private Coursier coursier;
 
-    @OneToOne
-	private Restaurant restaurant;
+	@Column(name = "client", nullable = false)
+	private Long clientId;
 
     @Column(name = "eta")
     private Long eta;
 
-	@Enumerated(EnumType.STRING)
-	private Status status;
-
 	public Order() {
     }
 
-	public Meal getMeal() {
-		return meal;
+	public List<Meal> getMeals() {
+		return meals;
 	}
 
-	public void setMeal(Meal meal) {
-		this.meal = meal;
+	public void setMeals(List<Meal> meals) {
+		this.meals = meals;
 	}
 
 	public Coursier getCoursier() {
@@ -51,25 +45,13 @@ public class Order implements Serializable {
 		this.coursier = coursier;
 	}
 
-	public Restaurant getRestaurant() {
-		return restaurant;
-	}
-
-	public void setRestaurant(Restaurant restaurant) {
-		this.restaurant = restaurant;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public Long getId() {
         return id;
     }
-
-    public Status getStatus() {
-    	return this.status;
-	}
-
-	public void setStatus(Status status) {
-    	this.status = status;
-	}
 
 	public Long getETA() {
     	return eta;
@@ -79,11 +61,12 @@ public class Order implements Serializable {
     	this.eta = eta;
 	}
 
-	public enum Status {
-		IN_PROGRESS,
-		COMPLETED,
-		CANCELLED,
-		ASSIGNED
+	public Long getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(Long clientId) {
+		this.clientId = clientId;
 	}
 
 }

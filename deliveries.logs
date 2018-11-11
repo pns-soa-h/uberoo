@@ -1,0 +1,12 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v2.0.5.RELEASE)
+
+2018-10-23 21:05:14.030  INFO 18592 --- [           main] f.unice.polytech.soa.uberoo.Application  : Starting Application v1.0-SNAPSHOT on helios with PID 18592 (/home/julien/Polytech/SI5/SOA/uberoo/uberoo-deliveries/target/uberoo-deliveries-1.0-SNAPSHOT.jar started by julien in /home/julien/Polytech/SI5/SOA/uberoo)
+2018-10-23 21:05:14.038  INFO 18592 --- [           main] f.unice.polytech.soa.uberoo.Application  : No active profile set, falling back to default profiles: default
+2018-10-23 21:05:14.112  INFO 18592 --- [           main] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@42f30e0a: startup date [Tue Oct 23 21:05:14 CEST 2018]; root of context hierarchy

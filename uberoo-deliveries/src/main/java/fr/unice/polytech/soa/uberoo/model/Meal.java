@@ -7,18 +7,17 @@ import java.util.Objects;
 /**
  * Created by Alexis Couvreur on 9/24/2018.
  */
-@Entity
+@Embeddable
 public class Meal {
 
-    @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
+	@Column(name = "meal_id")
+	private Long id;
 
     @Column(unique = true)
     @NotNull
     private String label;
 
-    @OneToOne
+    @Embedded
 	@NotNull
 	private Restaurant restaurant;
 
@@ -33,14 +32,6 @@ public class Meal {
     	this.label = label;
     	this.description = description;
     	this.restaurant = restaurant;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getLabel() {
@@ -65,6 +56,14 @@ public class Meal {
 
 	public void setRestaurant(Restaurant restaurant) {
 		this.restaurant = restaurant;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	@Override
