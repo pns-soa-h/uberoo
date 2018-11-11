@@ -10,7 +10,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Component
-public class CouponResourceAssemler implements ResourceAssembler<Coupon, Resource<Coupon>> {
+public class CouponResourceAssembler implements ResourceAssembler<Coupon, Resource<Coupon>> {
 	@Override
 	public Resource<Coupon> toResource(Coupon entity) {
 		return new Resource<>(entity,

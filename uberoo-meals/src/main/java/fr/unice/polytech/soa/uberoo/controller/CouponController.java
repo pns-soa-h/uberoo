@@ -1,6 +1,6 @@
 package fr.unice.polytech.soa.uberoo.controller;
 
-import fr.unice.polytech.soa.uberoo.assembler.CouponResourceAssemler;
+import fr.unice.polytech.soa.uberoo.assembler.CouponResourceAssembler;
 import fr.unice.polytech.soa.uberoo.exception.CouponNotFoundException;
 import fr.unice.polytech.soa.uberoo.model.Coupon;
 import fr.unice.polytech.soa.uberoo.repository.CouponRepository;
@@ -24,10 +24,10 @@ public class CouponController {
 
 	private final CouponRepository repository;
 
-	private final CouponResourceAssemler assembler;
+	private final CouponResourceAssembler assembler;
 
 	@Autowired
-	public CouponController(CouponRepository repository, CouponResourceAssemler assembler) {
+	public CouponController(CouponRepository repository, CouponResourceAssembler assembler) {
 		this.repository = repository;
 		this.assembler = assembler;
 	}
